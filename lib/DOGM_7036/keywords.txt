@@ -1,0 +1,30 @@
+#######################################
+# Syntax Coloring Map DOGM-Text
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+dogm_7036	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+initialize	KEYWORD2
+string	KEYWORD2       
+ascii	KEYWORD2        
+position	KEYWORD2     
+displ_onoff	KEYWORD2	
+cursor_onoff	KEYWORD2
+define_char	KEYWORD2  
+clear_display	KEYWORD2
+contrast	KEYWORD2     
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+DOGM081	LITERAL1
+DOGM162	LITERAL1
+DOGM163	LITERAL1
