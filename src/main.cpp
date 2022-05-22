@@ -60,7 +60,7 @@
 #endif
 
 // Uncomment for debug output on the serial console or to switch on I2C/Wire Fast Mode
-// PlatformIO: Set it in platform.ini (build_flags)
+// PlatformIO: Set it in platform.ini (debug_flags)
 //#define WIRE_FAST_MODE	
 //#define PRINT_TIME_SERIAL
 //#define DEBUG_DCF77CONTROL

@@ -4,7 +4,7 @@
 /// @brief Declaration of free functions to convert values in BCD format to 
 ///        decimal format and vice versa.
 /// 
-/// @date 2022-05-20
+/// @date 2022-05-22
 /// @version 1.0
 /// 
 /// @copyright Copyright (c) 2022

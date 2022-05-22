@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 /// @file display.h
 /// @author Kai R. (you@domain.com)
-/// @brief Definitions for display helper functions 
+/// @brief Declaration of display helper functions 
 /// 
 /// @section methods DOGM Methods available
 ///          description       Funktionen der DOGM_7036 Klasse
