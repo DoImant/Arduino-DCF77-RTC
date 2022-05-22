@@ -1,8 +1,19 @@
+//////////////////////////////////////////////////////////////////////////////
+/// @file dcf77.hpp
+/// @author Kai R.
+/// @brief Declaration of classes for handling received DCF77 signals
+/// 
+/// @date 2022-05-20
+/// @version 1.0
+/// 
+/// @copyright Copyright (c) 2022
+/// 
+//////////////////////////////////////////////////////////////////////////////
+
 #ifndef _DCF77_HPP_ 
 #define _DCF77_HPP_
 
 #include <stdint.h>
-#include "bcdconv.hpp"
 
 constexpr uint16_t THRESHOLD_DUR_MINUTE      = 1500;
 constexpr uint8_t  THRESHOLD_DUR_LONG_SIGNAL =  150;
@@ -34,7 +45,7 @@ public:
   DCF77Sequence getSequenceFlag(void);
 };
 
-class DCF77Clock : public DCF77Receive, protected BCDConv { // multiple inheritance! 
+class DCF77Clock : public DCF77Receive { 
 private:
   uint8_t  _oldMinutes;
   uint8_t  _oldHours;
@@ -54,9 +65,13 @@ private:
   bool _parityBitDate;
   bool _parityTimeOK;
   bool _parityDateOK;
+private:
+  uint8_t bcdToDec(uint8_t bcd) const { // inline 
+     return bcd - 6 * (bcd >> 4);
+  }
 
 public:
-  DCF77Clock(void) : DCF77Receive(), BCDConv() {};
+  DCF77Clock(void) : DCF77Receive() {};
 
   bool decodeSequence(void);
   bool getLeapSecond(void) const;

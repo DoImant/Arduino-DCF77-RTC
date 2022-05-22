@@ -1,7 +1,7 @@
 //////////////////////////////////////////////////////////////////////////////
 /// @file dcf77.cpp
 /// @author Kai R.
-/// @brief Class for handling received DCF77 signals
+/// @brief Classes for handling received DCF77 signals
 /// 
 /// @date 2022-05-20
 /// @version 1.0
@@ -100,7 +100,7 @@ void DCF77Receive::receiveSequence() {
 #endif
     // Signals arround 200ms are a logical 1 / 100ms are logical 0. So if (duration > THRESHOLD_DUR_LONG_SIGNAL) comes true set a bit.
     if (_duration > THRESHOLD_DUR_LONG_SIGNAL) {                               
-      _sequenceBuffer |= ((uint64_t) 1 << DCF77Receive::_seconds);
+      _sequenceBuffer |= ((uint64_t) 1 << _seconds);
     }
     _seconds++;
     _sequenceFlag = SEQ_ERROR;

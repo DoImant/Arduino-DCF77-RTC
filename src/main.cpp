@@ -39,6 +39,7 @@
 #include <Arduino.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
+#include "bcdconv.hpp"
 #include "dcf77.hpp"
 #include "button.hpp"
 #include "display.h"
