@@ -6,6 +6,9 @@
 /// @date 2022-05-20
 /// @version 1.0
 /// 
+/// @date 2022-06-06
+/// bool DCF77Receive::wasLastSignalLong() added
+//
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
@@ -108,8 +111,27 @@ void DCF77Receive::receiveSequence() {
   _lastInt = millis();
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Returns a flag. This flag provides information as to whether 
+///        a complete data reception sequence has been completed or not.
+///        MAX_SECONDS or LEAP_SECOND = OK
+///        SEQ_ERROR = Not OK or not yet complete.
+/// 
+/// @return DCF77Sequence MAX_SECONDS or LEAP_SECOND or SEQ_ERROR
+//////////////////////////////////////////////////////////////////////////////
 DCF77Sequence DCF77Receive::getSequenceFlag() {
   return _sequenceFlag;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+/// @brief This method returns whether the last signal received 
+///        was long or short.
+/// 
+/// @return true     long signal
+/// @return false    short signal
+//////////////////////////////////////////////////////////////////////////////
+bool DCF77Receive::wasLastSignalLong() {
+  return (_sequenceBuffer >> (_seconds-1) & 0x01);
 }
 
 // Methods of DCF77Clock //////////////////////////////////////////////////////

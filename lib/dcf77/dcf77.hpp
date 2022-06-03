@@ -6,6 +6,9 @@
 /// @date 2022-05-20
 /// @version 1.0
 /// 
+/// @date 2022-06-03
+/// bool DCF77Receive::wasLastSignalLong() added
+/// 
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
@@ -43,6 +46,7 @@ public:
   void begin(uint8_t);
   void setActiveLow(bool);
   DCF77Sequence getSequenceFlag(void);
+  bool wasLastSignalLong(void);
 };
 
 class DCF77Clock : public DCF77Receive { 

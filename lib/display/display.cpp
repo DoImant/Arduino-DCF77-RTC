@@ -6,28 +6,77 @@
 /// @date 2022-05-01
 /// @version 1.0
 /// 
+/// @date 2022-06-03
+/// Refactornig, added animated dots to the time display.
+/// File suffix changed from .h to .hpp.
+///
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
 
-#include "display.h"
+#include "display.hpp"
 #include "bcdconv.hpp"
 #include "dogm_7036.h"
 #include "DS3231Wire.h"
 #include "digitalWriteFast.h"
 
+// Methods of ClockData //////////////////////////////////////////////////////
+void ClockData::setTimeSeparator(Separators actSep) {
+	_actTimeSep = actSep;
+}
+
+void ClockData::setDateSeparator(Separators actSep) {
+	_actDateSep = actSep;
+}
+
+void ClockData::setTime() {
+	//Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
+  BCDConv::bcdTochar(_strTimeBuff,readRegister(DS3231_HOURS));
+  *(_strTimeBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_TIME)];
+  BCDConv::bcdTochar((_strTimeBuff+3),readRegister(DS3231_MINUTES));
+  *(_strTimeBuff+5) = _separator[static_cast<uint8_t>(_actTimeSep)];
+  BCDConv::bcdTochar((_strTimeBuff+6),readRegister(DS3231_SECONDS));
+  *(_strTimeBuff+8) = '\0';
+}
+
+void ClockData::setDate() {
+	 BCDConv::bcdTochar(_strDateBuff,readRegister(DS3231_DATE));
+  *(_strDateBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
+  BCDConv::bcdTochar((_strDateBuff+3),readRegister(DS3231_CEN_MONTH));
+  *(_strDateBuff+5) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
+  // *(strDateBuff+6) = '2';                         //change it 2099 :-)
+  // *(strDateBuff+7) = '0';
+  //bcdTochar((strDateBuff+8),readRegister(DS3231_YEAR));
+  BCDConv::bcdTochar((_strDateBuff+6),readRegister(DS3231_YEAR));
+  *(_strDateBuff+10) = '\0';
+}
+
+const char* ClockData::getTime() const {
+  return _strTimeBuff;
+}
+
+const char* ClockData::getDate() const {
+  return _strDateBuff;
+}
+// ClockData End /////////////////////////////////////////////////////////////
+
 //////////////////////////////////////////////////////////////////////////////
-/// @brief Initialisiere das DOGM Display
+/// @brief Initialize the DOGM display
 /// 
 /// @param disp 
 //////////////////////////////////////////////////////////////////////////////
-void initDisplay(dogm_7036 &disp) {                 
+void initDisplay(dogm_7036 &disp) {     
+  uint8_t halfColonUp[8]   = {0x00, 0x0C, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00};
+  uint8_t halfColonDown[8] = {0x00, 0x00, 0x00, 0x00, 0x0C, 0x0C, 0x00, 0x00};
+ 
   disp.initialize(SS,0,0,PIN_RS,PIN_RST,0,DOGM081);   // SS = 10, 0,0= use Hardware SPI, 7 = RS, 8 = RESET, 0 = 3.3V, EA DOGM081-A (=1 line)
   //disp.initialize(SS,0,0,PIN_RS,PIN_RST,0,DOGM162); // SS = 10, 0,0= use Hardware SPI, 7 = RS, 8 = RESET, 0 = 3.3V, EA DOGM081-A (=1 line)
   disp.displ_onoff(true);                  // turn Display on
   disp.cursor_onoff(false);                // turn Curosor blinking off
+  disp.define_char(0x01, halfColonUp);        //define own char on memory adress 1
+  disp.define_char(0x02, halfColonDown);      //define own char on memory adress 2
   pinModeFast(PIN_BACKLIGHT,  OUTPUT);
-  monoBacklight(BL_BRIGHTNESS_OFF);             // use monochrome backlight in this sample code. Please change it to your configuration
+  monoBacklight(BL_BRIGHTNESS_OFF);        // use monochrome backlight in this sample code. Please change it to your configuration
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -47,7 +96,6 @@ void monoBacklight(byte brightness)
 /// 
 /// @param second Second of RT-Clock at which the button was pressed
 //////////////////////////////////////////////////////////////////////////////
-
 void switchBacklight(uint8_t second, uint8_t blButtonPressed ) {     
   static bool backlightOn = false;
   static uint8_t lightOffTime;
@@ -67,40 +115,26 @@ void switchBacklight(uint8_t second, uint8_t blButtonPressed ) {
 /// 
 /// @param rtcTime 
 //////////////////////////////////////////////////////////////////////////////
-void printRtcTime(dogm_7036 &disp, uint8_t tSep, bool dateVisible) {
-  static char strTimeBuff[9];
-  static char strDateBuff[11];
+void printRtcTime(dogm_7036 &disp, Separators& tSep, bool dateVisible) {
+  ClockData cd;
+	static bool switchSep=true;
 
-  //Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
-  BCDConv::bcdTochar(strTimeBuff,readRegister(DS3231_HOURS));
-  *(strTimeBuff+2) = SEPARATOR_TIME[SEP_NORMAL];
-  BCDConv::bcdTochar((strTimeBuff+3),readRegister(DS3231_MINUTES));
-  *(strTimeBuff+5) = SEPARATOR_TIME[tSep];
-  BCDConv::bcdTochar((strTimeBuff+6),readRegister(DS3231_SECONDS));
-  *(strTimeBuff+8) = '\0';
-
-  BCDConv::bcdTochar(strDateBuff,readRegister(DS3231_DATE));
-  *(strDateBuff+2) = SEPARATOR_DATE;
-  BCDConv::bcdTochar((strDateBuff+3),readRegister(DS3231_CEN_MONTH));
-  *(strDateBuff+5) = SEPARATOR_DATE;
-  //*(strDateBuff+6) = '2';                         //change it 2099 :-)
-  //*(strDateBuff+7) = '0';
-  //bcdTochar((strDateBuff+8),readRegister(DS3231_YEAR));
-  BCDConv::bcdTochar((strDateBuff+6),readRegister(DS3231_YEAR));
-  *(strDateBuff+10) = '\0';
-  
   if (dateVisible) {
+		cd.setDate();
     disp.position(1,1);
-    disp.string(strDateBuff);
+    disp.string(cd.getDate());
   } else {
+    cd.setTimeSeparator((switchSep) ? tSep : Separators::SEP_COLDOWN);
+    switchSep = !switchSep;
+		cd.setTime();
     disp.position(1,1);
-    disp.string(strTimeBuff);
+    disp.string(cd.getTime()); 
   }
 
 #ifdef PRINT_TIME_SERIAL
   Serial.print("Time is ");
-  Serial.print(strDateBuff);
+  Serial.print(cd.getDate());
   Serial.print(" ");
-  Serial.print(strTimeBuff);
+  Serial.print(cd.getTime());
 #endif
 }

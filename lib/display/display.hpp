@@ -31,13 +31,17 @@
 /// 
 /// @date 2022-05-01
 /// @version 1.0
+///
+/// @date 2022-06-03
+/// Refactornig, added animated dots to the time display.
+///
 /// 
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef _DISPLAY_H
-#define _DISPLAY
+#ifndef _DISPLAY_HPP_
+#define _DISPLAY_HPP_
 
 #include <stdint.h>
 #include <SPI.h>
@@ -46,31 +50,51 @@
 //////////////////////////////////////////////////
 // Global constants and variables
 //////////////////////////////////////////////////
-
-typedef enum {SEP_NORMAL,SEP_ADJUST} separators;
-
-constexpr uint8_t PIN_RS = 7;                       // RS = Read/Write Data from/to RAM (Pin 39)
-constexpr uint8_t PIN_RST = 8;                      // Reset des Displays (Pin 40)
-constexpr uint8_t PIN_BACKLIGHT = 9;                // Pin (D9) for backlight brightness control
-constexpr uint8_t BUTTON_BL_PIN = 4;                // Pin (D4) for switching the backlight on
-constexpr uint8_t BUTTON_DT_PIN = 5;                // Pin (D5) for switching the date view on the Display
-
-constexpr uint8_t SEPARATOR_TIME[2] = {':',0xA5};   // DOGM Char-Codes
-constexpr uint8_t SEPARATOR_DATE = '-';
+constexpr uint8_t PIN_RS = 7;                           // RS = Read/Write Data from/to RAM (Pin 39)
+constexpr uint8_t PIN_RST = 8;                          // Reset des Displays (Pin 40)
+constexpr uint8_t PIN_BACKLIGHT = 9;                    // Pin (D9) for backlight brightness control
+constexpr uint8_t BUTTON_BL_PIN = 4;                    // Pin (D4) for switching the backlight on
+constexpr uint8_t BUTTON_DT_PIN = 5;                    // Pin (D5) for switching the date view on the Display
 
 // PWM duty cycles for brightness: 0 = off, 255 = max. brightness 
 constexpr uint8_t BL_BRIGHTNESS_OFF = 0;    
 constexpr uint8_t BL_BRIGHTNESS_ON = 16;    
-constexpr uint8_t BL_BURN_DURATION = 10;           // Time in sec
+constexpr uint8_t BL_BURN_DURATION = 10;                // Time in sec
 
-constexpr uint8_t SHOW_DATE_DURATION = 10;         // Time in sec 
+constexpr uint8_t SHOW_DATE_DURATION = 10;              // Time in sec 
+
+//////////////////////////////////////////////////
+// Class definitions
+//////////////////////////////////////////////////
+enum class Separators {SEP_SPACE, SEP_TIME, SEP_DATE, SEP_COLUP,SEP_COLDOWN};
+
+class ClockData {
+private:
+  char _strTimeBuff[9];
+  char _strDateBuff[11];
+	//unsigned char _separator[4] = {' ',':','-',0xA5}; 
+	unsigned char _separator[5] = {' ',':','-',0x01,0x02}; 
+  Separators _actTimeSep;
+  Separators _actDateSep; 	
+	
+public:
+  ClockData(Separators actTimeSep = Separators::SEP_TIME, Separators actDateSep = Separators::SEP_DATE)
+    : _actTimeSep(actTimeSep), _actDateSep(actDateSep) {}
+	
+  void setTimeSeparator(Separators);
+  void setDateSeparator(Separators);
+  void setTime(void);
+	void setDate(void);
+  const char* getTime() const; 
+  const char* getDate() const; 
+};
 
 //////////////////////////////////////////////////
 // Function forward declaration
 //////////////////////////////////////////////////
-void initDisplay(dogm_7036 &disp);
+void initDisplay(dogm_7036& disp);
 void monoBacklight(byte brightness);
-void printRtcTime(dogm_7036 &disp, uint8_t tSep, bool dateVisible);
+void printRtcTime(dogm_7036& disp, Separators& tSep, bool dateVisible);
 void switchBacklight(uint8_t second, uint8_t blButtonPressed);
 
 #endif

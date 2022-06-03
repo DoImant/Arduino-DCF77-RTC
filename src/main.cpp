@@ -32,6 +32,9 @@
 /// @date 2022-05-20
 /// @version 1.1
 /// 
+/// @date 2022-06-03
+/// Refactornig, added animated dots to the time display.
+///
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
@@ -42,7 +45,7 @@
 #include "bcdconv.hpp"
 #include "dcf77.hpp"
 #include "button.hpp"
-#include "display.h"
+#include "display.hpp"
 #include "DS3231Wire.h"
 #include "digitalWriteFast.h"
 
@@ -88,8 +91,6 @@ constexpr uint8_t DCF77_ON_OFF_PIN = 6;             // Switch DCF77 Receiver on 
 #endif
 constexpr uint32_t DCF77_SLEEP = 1790U;             // Period (in seconds) for which the radio clock is switched off. Here 1790 Seconds.
 
-uint8_t timeSeparator;                              // global for main.cpp. Index for separator chars (display).
-
 // int1_second is just a counter that increases every second.
 // It is not necessarily in sync with the RTC seconds
 volatile uint8_t  int1_second=0;                    // Second Tick in loop(), set in INT1
@@ -125,7 +126,6 @@ void setup () {
   pinModeFast(BUTTON_BL_PIN,INPUT_PULLUP);
   pinModeFast(DCF77_ON_OFF_PIN,OUTPUT);
   digitalWriteFast(DCF77_ON_OFF_PIN,LOW);               // Switch DCF77 receiver on (P-Channel MOSFet as switch)
-  timeSeparator = SEP_ADJUST;                           // Indicator that the synchronization of the clock has not yet been completed.
   
   // init DOGM-LCD
   initDisplay(lcd);
@@ -162,13 +162,17 @@ void loop () {
   static uint8_t dateVisibleOffTime = 0;
   static uint32_t dcf77SleepCounter = 0;
   static Button dtButton(BUTTON_DT_PIN);
-  static Button blButton(BUTTON_BL_PIN);  
+  static Button blButton(BUTTON_BL_PIN);
+  Separators timeSeparator;                             // Index for separator chars (display).
   
   if (dcf77PoweredOn) {
     if (!rtcNeedsSync()) {                              // If rtcHasToSync() returns 0 (false) both clocks are synchronous.
       digitalWriteFast(DCF77_ON_OFF_PIN,HIGH);          // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
       dcf77PoweredOn = false;
-    } 
+      timeSeparator = Separators::SEP_COLUP;
+    } else {
+      timeSeparator = Separators::SEP_SPACE;
+    }
   } 
     
   if (dtButton.tic() != ButtonState::P_NONE) {
@@ -251,13 +255,11 @@ bool rtcNeedsSync() {
                   dcf77.getBcdMinutes(), 
                   1
       );
-      timeSeparator = SEP_ADJUST;
 #ifdef DEBUG_DCF77CONTROL
       Serial.println(F("set RTC"));
 #endif
     } else {
       rtcSetTime = false;
-      timeSeparator = SEP_NORMAL;
     }
   } 
   return rtcSetTime;
