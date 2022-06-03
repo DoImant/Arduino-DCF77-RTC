@@ -8,7 +8,7 @@ The time is displayed on an 8-digit DOGM LCD display. The display is operated wi
 
 There are two buttons to control the display. One controls the date display, the second the backlight.
 
-When pressing the date display button, the current date is displayed for 10 seconds. The display then automatically switches back to the time display. The second button turns on the backlight. If it is only pressed briefly (< 1 second), the backlight is only switched on for a certain period of time (10 Seconds). It then turns itself off again. If the button was pressed for a longer time (>= 1 second), the backlight remains active until the button is pressed again.
+When pressing the date display button, the current date is displayed for 10 seconds. The display then automatically switches back to the time display. The second button turns on the backlight. If it is only pressed briefly (< 1 second), the backlight is only switched on for a certain period of time (10 seconds). It then turns itself off again. If the button was pressed for a longer time (>= 1 second), the backlight remains active until the button is pressed again.
 
 The power consumption is (at 3V operating voltage) around 2,3mA when DCF and RTC clock are running simultaneously. It drops to
 about 1.5mA when only the RTC and the display are active. The backlight needs about 4-5mA additionally at the programmed brightness. The desired brightness can be adjusted in the program code. The clock can therefore be operated well battery-backed with a small solar cell.
