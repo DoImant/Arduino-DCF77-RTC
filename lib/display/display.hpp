@@ -84,7 +84,7 @@ public:
   void setTimeSeparator(Separators);
   void setDateSeparator(Separators);
   void setTime(void);
-	void setDate(void);
+  void setDate(void);
   const char* getTime() const; 
   const char* getDate() const; 
 };

@@ -21,14 +21,30 @@
 #include "digitalWriteFast.h"
 
 // Methods of ClockData //////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Sets the separator for the time display.
+/// 
+/// @param actSep 
+//////////////////////////////////////////////////////////////////////////////
 void ClockData::setTimeSeparator(Separators actSep) {
 	_actTimeSep = actSep;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Sets the separator for the Date display.
+/// 
+/// @param actSep 
+//////////////////////////////////////////////////////////////////////////////
 void ClockData::setDateSeparator(Separators actSep) {
 	_actDateSep = actSep;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Reads the time from the RTC and copies the data into a 
+///        string for the time display.
+/// 
+//////////////////////////////////////////////////////////////////////////////
 void ClockData::setTime() {
 	//Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
   BCDConv::bcdTochar(_strTimeBuff,readRegister(DS3231_HOURS));
@@ -39,6 +55,11 @@ void ClockData::setTime() {
   *(_strTimeBuff+8) = '\0';
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Reads the date from the RTC and copies the data into a 
+///        string for the date display.
+/// 
+//////////////////////////////////////////////////////////////////////////////
 void ClockData::setDate() {
 	 BCDConv::bcdTochar(_strDateBuff,readRegister(DS3231_DATE));
   *(_strDateBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
@@ -51,10 +72,20 @@ void ClockData::setDate() {
   *(_strDateBuff+10) = '\0';
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Returns the address of the string for the time display.
+/// 
+/// @return const char*   Addresss of the String for the time display
+//////////////////////////////////////////////////////////////////////////////
 const char* ClockData::getTime() const {
   return _strTimeBuff;
 }
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Returns the address of the string for the date display.
+/// 
+/// @return const char*   Address of the String for the date display
+//////////////////////////////////////////////////////////////////////////////
 const char* ClockData::getDate() const {
   return _strDateBuff;
 }
