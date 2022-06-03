@@ -34,7 +34,8 @@
 ///
 /// @date 2022-06-03
 /// Refactornig, added animated dots to the time display.
-///
+/// File suffix changed from .h to .hpp.
+/// The behavior of the backlight button has been changed. Two switching modes are now possible.
 /// 
 /// @copyright Copyright (c) 2022
 /// 
@@ -46,6 +47,7 @@
 #include <stdint.h>
 #include <SPI.h>
 #include <dogm_7036.h>
+#include "button.hpp"
 
 //////////////////////////////////////////////////
 // Global constants and variables
@@ -62,17 +64,18 @@ constexpr uint8_t BL_BRIGHTNESS_ON = 16;
 constexpr uint8_t BL_BURN_DURATION = 10;                // Time in sec
 
 constexpr uint8_t SHOW_DATE_DURATION = 10;              // Time in sec 
+constexpr uint8_t MINUTE             = 60;              
+constexpr uint8_t MINUTE_IMPOSSIBLE  = 61;              
 
 //////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////
-enum class Separators {SEP_SPACE, SEP_TIME, SEP_DATE, SEP_COLUP,SEP_COLDOWN};
+enum class Separators {SEP_SPACE, SEP_TIME, SEP_DATE, SEP_COLUP, SEP_COLDOWN};
 
 class ClockData {
 private:
   char _strTimeBuff[9];
   char _strDateBuff[11];
-	//unsigned char _separator[4] = {' ',':','-',0xA5}; 
 	unsigned char _separator[5] = {' ',':','-',0x01,0x02}; 
   Separators _actTimeSep;
   Separators _actDateSep; 	
@@ -95,6 +98,6 @@ public:
 void initDisplay(dogm_7036& disp);
 void monoBacklight(byte brightness);
 void printRtcTime(dogm_7036& disp, Separators& tSep, bool dateVisible);
-void switchBacklight(uint8_t second, uint8_t blButtonPressed);
+void switchBacklight(uint8_t second, ButtonState blButtonPressed);
 
 #endif

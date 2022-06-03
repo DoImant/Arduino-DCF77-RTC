@@ -8,7 +8,7 @@
 /// 
 /// @date 2022-06-03
 /// Refactornig, added animated dots to the time display.
-/// File suffix changed from .h to .hpp.
+/// The behavior of the backlight button has been changed. Two switching modes are now possible.
 ///
 /// @copyright Copyright (c) 2022
 /// 
@@ -16,7 +16,6 @@
 
 #include "display.hpp"
 #include "bcdconv.hpp"
-#include "dogm_7036.h"
 #include "DS3231Wire.h"
 #include "digitalWriteFast.h"
 
@@ -28,7 +27,7 @@
 /// @param actSep 
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setTimeSeparator(Separators actSep) {
-	_actTimeSep = actSep;
+  _actTimeSep = actSep;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -37,7 +36,7 @@ void ClockData::setTimeSeparator(Separators actSep) {
 /// @param actSep 
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setDateSeparator(Separators actSep) {
-	_actDateSep = actSep;
+  _actDateSep = actSep;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -46,7 +45,7 @@ void ClockData::setDateSeparator(Separators actSep) {
 /// 
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setTime() {
-	//Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
+  //Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
   BCDConv::bcdTochar(_strTimeBuff,readRegister(DS3231_HOURS));
   *(_strTimeBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_TIME)];
   BCDConv::bcdTochar((_strTimeBuff+3),readRegister(DS3231_MINUTES));
@@ -61,7 +60,7 @@ void ClockData::setTime() {
 /// 
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setDate() {
-	 BCDConv::bcdTochar(_strDateBuff,readRegister(DS3231_DATE));
+	BCDConv::bcdTochar(_strDateBuff,readRegister(DS3231_DATE));
   *(_strDateBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
   BCDConv::bcdTochar((_strDateBuff+3),readRegister(DS3231_CEN_MONTH));
   *(_strDateBuff+5) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
@@ -121,24 +120,32 @@ void monoBacklight(byte brightness)
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// @brief Check whether the backlight should be switched on.
-///        When turned on, it glows for a predetermined period of time. 
-///        It is then switched off again as long as the button is no longer pressed.
+/// @brief Turns on the backlight when the button is pressed. 
+///        If it is only pressed briefly (< 1 second), the backlight is only 
+///        switched on for a certain period of time. It then turns itself off 
+///        again. If the button was pressed for a long time (>= 1 second), 
+///        the backlight remains active until the button is pressed again.
 /// 
-/// @param second Second of RT-Clock at which the button was pressed
+/// @param second             Second of RT-Clock at which the button was pressed
+/// @param blButtonPressed    State of then button (not, short or long pressed)
 //////////////////////////////////////////////////////////////////////////////
-void switchBacklight(uint8_t second, uint8_t blButtonPressed ) {     
+void switchBacklight(uint8_t second, ButtonState blButtonPressed ) {     
   static bool backlightOn = false;
   static uint8_t lightOffTime;
-
-  if (blButtonPressed && !backlightOn) {
+  
+  if(blButtonPressed != ButtonState::P_NONE && !backlightOn) {
     backlightOn = true;
     monoBacklight(BL_BRIGHTNESS_ON);
-    lightOffTime = (second + BL_BURN_DURATION + 1) % 60;    // Mod 60 Seconds
-  } else if (second == lightOffTime && backlightOn) {
+    if (blButtonPressed ==  ButtonState::P_SHORT) {
+      lightOffTime = (second + BL_BURN_DURATION + 1) % MINUTE;    // Mod 60 Seconds
+    } else {
+      lightOffTime = MINUTE_IMPOSSIBLE;
+    }
+  } else if ( ((blButtonPressed != ButtonState::P_NONE && lightOffTime == MINUTE_IMPOSSIBLE) 
+                || second == lightOffTime) && backlightOn ) {
     backlightOn = false;
     monoBacklight(BL_BRIGHTNESS_OFF);
-  }
+  } 
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -146,9 +153,9 @@ void switchBacklight(uint8_t second, uint8_t blButtonPressed ) {
 /// 
 /// @param rtcTime 
 //////////////////////////////////////////////////////////////////////////////
-void printRtcTime(dogm_7036 &disp, Separators& tSep, bool dateVisible) {
+void printRtcTime(dogm_7036& disp, Separators& tSep, bool dateVisible) {
   ClockData cd;
-	static bool switchSep=true;
+  static bool switchSep = true;
 
   if (dateVisible) {
 		cd.setDate();

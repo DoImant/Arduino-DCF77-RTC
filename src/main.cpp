@@ -123,9 +123,9 @@ void setup () {
   #endif
 #endif
 
-  pinModeFast(BUTTON_BL_PIN,INPUT_PULLUP);
-  pinModeFast(DCF77_ON_OFF_PIN,OUTPUT);
-  digitalWriteFast(DCF77_ON_OFF_PIN,LOW);               // Switch DCF77 receiver on (P-Channel MOSFet as switch)
+  pinModeFast(BUTTON_BL_PIN, INPUT_PULLUP);
+  pinModeFast(DCF77_ON_OFF_PIN, OUTPUT);
+  digitalWriteFast(DCF77_ON_OFF_PIN, LOW);               // Switch DCF77 receiver on (P-Channel MOSFet as switch)
   
   // init DOGM-LCD
   initDisplay(lcd);
@@ -139,7 +139,7 @@ void setup () {
   Wire.setClock(WIRE_SPEED);
   disable32kHz();
   enableSw1Hz();
-  attachInterrupt(digitalPinToInterrupt(PIND3),check1HzSig,RISING);
+  attachInterrupt(digitalPinToInterrupt(PIND3), check1HzSig, RISING);
 #ifdef SET_TEST_TIME
   setDateTime(BCDConv::decToBcd(0),
               BCDConv::decToBcd(1),
@@ -167,7 +167,7 @@ void loop () {
   
   if (dcf77PoweredOn) {
     if (!rtcNeedsSync()) {                              // If rtcHasToSync() returns 0 (false) both clocks are synchronous.
-      digitalWriteFast(DCF77_ON_OFF_PIN,HIGH);          // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
+      digitalWriteFast(DCF77_ON_OFF_PIN, HIGH);         // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
       dcf77PoweredOn = false;
       timeSeparator = Separators::SEP_COLUP;
     } else {
@@ -205,7 +205,7 @@ void loop () {
     }
     printRtcTime(lcd,timeSeparator, showDate);
   } 
-  switchBacklight(int1_second, static_cast<uint8_t>(blButton.tic())); // Switch backlight on if button has been pressed.
+  switchBacklight(int1_second, blButton.tic()); // Switch backlight on if button has been pressed.
 }
 
 //////////////////////////////////////////////////////////////////////////////
