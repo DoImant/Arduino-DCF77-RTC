@@ -8,7 +8,11 @@
 /// 
 /// @date 2022-06-06
 /// bool DCF77Receive::wasLastSignalLong() added
-//
+///
+/// @date 2022-06-06
+/// Change when determining the signal length. A short signal must now be at least 
+/// 85ms (THRESHOLD_DUR_SHORT_SIGNAL) long to be recognized and accepted.
+///
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
@@ -26,6 +30,7 @@ bool DCF77Receive::_activeLow  = false;
 uint8_t DCF77Receive::_seconds     = 0;
 uint16_t DCF77Receive::_duration   = 0;
 uint32_t DCF77Receive::_lastInt    = 0;
+bool DCF77Receive::_longSig    = false;
 uint64_t DCF77Receive::_sequenceBuffer = 0;
 DCF77Sequence  DCF77Receive::_sequenceFlag = SEQ_ERROR;
 
@@ -70,7 +75,7 @@ void DCF77Receive::receiveSequence() {
   _duration = millis() - _lastInt;
 
   if (digitalReadFast(_intPin) ^ _activeLow) {
-#ifdef DEBUG_INT0
+#ifdef DEBUG_ISR
     Serial.println(_duration);
 #endif
     if (_duration > THRESHOLD_DUR_MINUTE) {
@@ -80,32 +85,30 @@ void DCF77Receive::receiveSequence() {
           break;
         case LEAP_SECOND: 
           _sequenceFlag = LEAP_SECOND;
-#ifdef DEBUG_INT0_ERR
-          Serial.println(F("Time sequence may have leap second"));
-#endif
           break;
         default: 
           _sequenceFlag = SEQ_ERROR;
           _sequenceBuffer = 0;
-#ifdef DEBUG_INT0_ERR
-          Serial.println(F("Time sequence not received correctly"));
-#endif
           break;
       }
       _seconds = 0;
     }
   } else {
-#ifdef DEBUG_INT0
+#ifdef DEBUG_ISR
     Serial.print(_seconds);
     Serial.print(F(". "));
     Serial.print(_duration);
     Serial.print(F("  /  "));
 #endif
     // Signals arround 200ms are a logical 1 / 100ms are logical 0. So if (duration > THRESHOLD_DUR_LONG_SIGNAL) comes true set a bit.
-    if (_duration > THRESHOLD_DUR_LONG_SIGNAL) {                               
-      _sequenceBuffer |= ((uint64_t) 1 << _seconds);
+    if (_duration > THRESHOLD_DUR_SHORT_SIGNAL) {
+      _longSig = false;
+      if (_duration > THRESHOLD_DUR_LONG_SIGNAL) {                               
+        _sequenceBuffer |= ((uint64_t) 1 << _seconds);
+        _longSig = true;
+      } 
+      _seconds++;
     }
-    _seconds++;
     _sequenceFlag = SEQ_ERROR;
   }
   _lastInt = millis();
@@ -131,7 +134,7 @@ DCF77Sequence DCF77Receive::getSequenceFlag() {
 /// @return false    short signal
 //////////////////////////////////////////////////////////////////////////////
 bool DCF77Receive::wasLastSignalLong() {
-  return (_sequenceBuffer >> (_seconds-1) & 0x01);
+  return _longSig;
 }
 
 // Methods of DCF77Clock //////////////////////////////////////////////////////
@@ -192,17 +195,17 @@ bool DCF77Clock::decodeSequence() {
     } 
 
 #ifdef DEBUG_DCF77_SEQ_ADD_CHECK
-      Serial.print(F("Parity Time: "));
+      Serial.print(F("Par Time: "));
       Serial.println(_parityTimeOK);
-      Serial.print(F("Parity Date: "));
+      Serial.print(F("Par Date: "));
       Serial.println(_parityDateOK);
-      Serial.print(F("hours      : "));
+      Serial.print(F("hours: "));
       Serial.println((bcdToDec(_hours)));
-      Serial.print(F("oldHours   : "));
+      Serial.print(F("oldHours: "));
       Serial.println((bcdToDec(_oldHours)));
-      Serial.print(F("minutes    : "));
+      Serial.print(F("minutes: "));
       Serial.println((bcdToDec(_minutes)));
-      Serial.print(F("oldMinutes : "));
+      Serial.print(F("oldMinutes: "));
       Serial.println((bcdToDec(_oldMinutes)));
       Serial.print(F("Diff. hours   - oldHours + (0|1) (should be zero) : "));
       Serial.println(abs(bcdToDec(_hours) - ((bcdToDec(_oldHours) + (_minutes ? 0 : 1)) % 24))) ;
@@ -213,20 +216,20 @@ bool DCF77Clock::decodeSequence() {
   _sequenceBuffer = 0;
 
 #ifdef DEBUG_DCF77_SEQ
-  Serial.print(F("Leap second    : "));
+  Serial.print(F("Ls: "));
   Serial.println(bcdToDec(_leapSecond));
-  Serial.println(F("Current date and Time:"));
-  Serial.print(F("Year           : "));
+  Serial.println(F("Date and Time:"));
+  Serial.print(F("Yr : "));
   Serial.println(bcdToDec(_year));
-  Serial.print(F("Month          : "));
+  Serial.print(F("Mon: "));
   Serial.println(bcdToDec(_month));
-  Serial.print(F("Day of Month   : "));
+  Serial.print(F("DoM: "));
   Serial.println(bcdToDec(_dayOfMonth));
-  Serial.print(F("Day of the Week: "));
+  Serial.print(F("DoW: "));
   Serial.println(_dayOfWeek);
-  Serial.print(F("Hours          : "));
+  Serial.print(F("Hr : "));
   Serial.println(bcdToDec(_hours));
-  Serial.print(F("Minutes        : "));
+  Serial.print(F("Min: "));
   Serial.println(bcdToDec(_minutes));
 #endif
   return (_parityTimeOK && _parityDateOK);

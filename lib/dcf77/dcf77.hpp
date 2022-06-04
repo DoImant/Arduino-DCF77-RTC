@@ -20,6 +20,7 @@
 
 constexpr uint16_t THRESHOLD_DUR_MINUTE      = 1500;
 constexpr uint8_t  THRESHOLD_DUR_LONG_SIGNAL =  150;
+constexpr uint8_t  THRESHOLD_DUR_SHORT_SIGNAL =  85;
 constexpr uint8_t  HOUR_CHANGE = 59;
 
 enum DCF77Sequence {SEQ_ERROR,
@@ -31,6 +32,7 @@ private:
   static bool _activeLow;
   static uint16_t _duration;
   static uint32_t _lastInt;
+  static bool _longSig;
 protected:
   static uint8_t _intPin;
   static uint8_t _seconds;
