@@ -141,8 +141,8 @@ void switchBacklight(uint8_t second, ButtonState blButtonPressed ) {
     } else {
       lightOffTime = MINUTE_IMPOSSIBLE;
     }
-  } else if ( ((blButtonPressed != ButtonState::P_NONE && lightOffTime == MINUTE_IMPOSSIBLE) 
-                || second == lightOffTime) && backlightOn ) {
+  } else if ( ((blButtonPressed != ButtonState::P_NONE && lightOffTime == MINUTE_IMPOSSIBLE)  || second == lightOffTime) 
+              && backlightOn ) {
     backlightOn = false;
     monoBacklight(BL_BRIGHTNESS_OFF);
   } 

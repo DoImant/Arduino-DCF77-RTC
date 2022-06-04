@@ -34,7 +34,7 @@ class Button {
     uint16_t _isLong;           // Saves the time (in ms) from which a key press is recognized as long.
     bool _activeState;          // Saves whether the buttons active state is HIGH or LOW.
     bool _state;                // Saves the actual state of the button.
-    bool _prevState;         // Saves the previous state of the button.
+    bool _prevState;            // Saves the previous state of the button.
     uint32_t _pressingTime;     // Saves the length of time that the button was pressed (ms).
     ButtonState _buttonState;   // Saves the status depending on how long the button was pressed.
   

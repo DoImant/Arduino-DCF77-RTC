@@ -163,7 +163,7 @@ void loop () {
   static uint32_t dcf77SleepCounter = 0;
   static Button dtButton(BUTTON_DT_PIN);
   static Button blButton(BUTTON_BL_PIN);
-  Separators timeSeparator;                             // Index for separator chars (display).
+  static Separators timeSeparator;                      // Index for separator chars (display).
   
   if (dcf77PoweredOn) {
     if (!rtcNeedsSync()) {                              // If rtcHasToSync() returns 0 (false) both clocks are synchronous.
@@ -179,6 +179,7 @@ void loop () {
     showDate = true;
     printRtcTime(lcd, timeSeparator, showDate);         // Don't wait until the next second after the button is pressed to show the date.
   }            
+  switchBacklight(int1_second, blButton.tic());         // Switch backlight on if button has been pressed.
   
   // Do the following every second.
   // To limit the read operations to the RTC (read the second), use the count variable of INT1. 
@@ -205,7 +206,6 @@ void loop () {
     }
     printRtcTime(lcd,timeSeparator, showDate);
   } 
-  switchBacklight(int1_second, blButton.tic()); // Switch backlight on if button has been pressed.
 }
 
 //////////////////////////////////////////////////////////////////////////////
