@@ -35,6 +35,11 @@
 /// @date 2022-06-03
 /// Refactornig, added animated dots to the time display.
 ///
+/// @date 2022-06-04
+/// When debugging is turned on on the serial console, certain code parts are now turned off 
+/// during compilation so that enough memory is available for the debugging output.
+/// (define SAVE_SPACE_FOR_DEBUG)
+///
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
