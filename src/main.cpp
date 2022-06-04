@@ -38,7 +38,7 @@
 /// @date 2022-06-04
 /// When debugging is turned on on the serial console, certain code parts are now turned off 
 /// during compilation so that enough memory is available for the debugging output.
-/// (define SAVE_SPACE_FOR_DEBUG)
+/// (define DEBUG_ENABLED)
 ///
 /// @copyright Copyright (c) 2022
 /// 
@@ -78,6 +78,13 @@
 //#define DEBUG_DCF77_SEQ
 //#define SET_TEST_TIME
 
+// If DEBUG_ENABLED is defined, then certain parts of the program are disabled ( in loop() ) to 
+// free up space for the debug output on the serial console.
+#if defined(PRINT_TIME_SERIAL) || defined(DEBUG_DCF77CONTROL) || defined(DEBUG_ISR) \
+  || defined(DEBUG_INT1) || defined(DEBUG_DCF77_SEQ_ADD_CHECK) || defined(DEBUG_DCF77_SEQ) 
+  #define DEBUG_ENABLED
+#endif
+
 #ifdef WIRE_FAST_MODE
   #define WIRE_SPEED 400000U          // I2C Fast Mode
 #else
@@ -101,6 +108,10 @@ volatile uint8_t  int1_second=0;                    // Second Tick in loop(), se
 
 DCF77Clock dcf77;
 dogm_7036 lcd;
+#ifndef DEBUG_ENABLED
+Button dtButton(BUTTON_DT_PIN);
+Button blButton(BUTTON_BL_PIN);
+#endif
 
 //////////////////////////////////////////////////
 // Function forward declaration
@@ -118,15 +129,11 @@ void setup () {
   optimizePowerConsumption();
 
   // With ATtiny controllers, the serial output is via the Serial -TX pin. An FTD232 adapter is required.
-#if defined(PRINT_TIME_SERIAL) ||defined(DEBUG_DCF77CONTROL) || defined(DEBUG_ISR) \
-  || defined(DEBUG_INT1) || defined(DEBUG_DCF77_SEQ_ADD_CHECK) || defined(DEBUG_DCF77_SEQ) 
+#ifdef DEBUG_ENABLED
     Serial.begin(9600);
   #ifndef ESP8266
     while (!Serial); // wait for serial port to connect. Needed for native USB
   #endif
-  #define SAVE_SPACE_FOR_DEBUG
-#else
-  #undef SAVE_SPACE_FOR_DEBUG
 #endif
 
   pinModeFast(BUTTON_BL_PIN, INPUT_PULLUP);
@@ -166,15 +173,13 @@ void loop () {
   static Separators timeSeparator;                      // Index for separator chars (display).
   static bool showDate = false;
   static bool dcf77PoweredOn = true;
-#ifndef SAVE_SPACE_FOR_DEBUG
+#ifndef DEBUG_ENABLED
   static uint8_t dateVisibleOffTime = 0;
   static uint32_t dcf77SleepCounter = 0;
-  static Button dtButton(BUTTON_DT_PIN);
-  static Button blButton(BUTTON_BL_PIN);
 #endif
   if (dcf77PoweredOn) {
     if (!rtcNeedsSync()) {                              // If rtcHasToSync() returns 0 (false) both clocks are synchronous.
-#ifndef SAVE_SPACE_FOR_DEBUG
+#ifndef DEBUG_ENABLED
       digitalWriteFast(DCF77_ON_OFF_PIN, HIGH);         // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
       dcf77PoweredOn = false;
 #endif
@@ -183,7 +188,7 @@ void loop () {
       timeSeparator = Separators::SEP_SPACE;
     }
   } 
-#ifndef SAVE_SPACE_FOR_DEBUG
+#ifndef DEBUG_ENABLED
   if (dtButton.tic() != ButtonState::P_NONE) {
     showDate = true;
     printRtcTime(lcd, timeSeparator, showDate);         // Don't wait until the next second after the button is pressed to show the date.
@@ -197,7 +202,7 @@ void loop () {
   // The clock comes from the 1Hz signal of the RTC which is present at the INT1 pin.
   if ( int1_second != tickSecond) {
     tickSecond = int1_second;
-#ifndef SAVE_SPACE_FOR_DEBUG
+#ifndef DEBUG_ENABLED
     if (!dcf77PoweredOn) {                              
       ++dcf77SleepCounter;
       if (dcf77SleepCounter == DCF77_SLEEP) {
