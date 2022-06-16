@@ -160,7 +160,7 @@ void dogm_7036::define_char(byte mem_adress, byte *dat)
 
 	for (i=0; i<8; i++) 
 		data(dat[i]);
-		
+  
   position(1,1); //set standard position DDRAM Adress
 }
 

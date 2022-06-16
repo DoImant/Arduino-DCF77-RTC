@@ -75,10 +75,10 @@ enum class Separators {SEP_SPACE, SEP_TIME, SEP_DATE, SEP_COLUP, SEP_COLDOWN};
 class ClockData {
 private:
   char _strTimeBuff[9];
-  char _strDateBuff[11];
+  char _strDateBuff[9];
 	unsigned char _separator[5] = {' ',':','-',0x01,0x02}; 
   Separators _actTimeSep;
-  Separators _actDateSep; 	
+  Separators _actDateSep;	
 	
 public:
   ClockData(Separators actTimeSep = Separators::SEP_TIME, Separators actDateSep = Separators::SEP_DATE)
@@ -89,7 +89,7 @@ public:
   void setTime(void);
   void setDate(void);
   const char* getTime() const; 
-  const char* getDate() const; 
+  const char* getDate() const;
 };
 
 //////////////////////////////////////////////////

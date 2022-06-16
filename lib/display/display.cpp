@@ -46,12 +46,12 @@ void ClockData::setDateSeparator(Separators actSep) {
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setTime() {
   //Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
-  BCDConv::bcdTochar(_strTimeBuff,readRegister(DS3231_HOURS));
-  *(_strTimeBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_TIME)];
-  BCDConv::bcdTochar((_strTimeBuff+3),readRegister(DS3231_MINUTES));
-  *(_strTimeBuff+5) = _separator[static_cast<uint8_t>(_actTimeSep)];
-  BCDConv::bcdTochar((_strTimeBuff+6),readRegister(DS3231_SECONDS));
   *(_strTimeBuff+8) = '\0';
+  BCDConv::bcdTochar((_strTimeBuff+6),readRegister(DS3231_SECONDS));
+  *(_strTimeBuff+5) = _separator[static_cast<uint8_t>(_actTimeSep)];
+  BCDConv::bcdTochar((_strTimeBuff+3),readRegister(DS3231_MINUTES));
+  *(_strTimeBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_TIME)];
+  BCDConv::bcdTochar(_strTimeBuff,readRegister(DS3231_HOURS));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -88,6 +88,7 @@ const char* ClockData::getTime() const {
 const char* ClockData::getDate() const {
   return _strDateBuff;
 }
+
 // ClockData End /////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////

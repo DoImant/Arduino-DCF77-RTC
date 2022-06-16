@@ -67,9 +67,13 @@
 #error Software not suitable for the microcontroller
 #endif
 
+// PlatformIO: Set it in platform.ini (mybuild_flags)
+// If the code is to be used for a developer board (Uno/Nano/Micro) then uncomment DEV_BOARD.
+// On the development boards with USB connection, pin6 is used instead of pin14 for switching the DCF77 module on and off.
+//#define DEV_BOARD 
+
 // Uncomment for debug output on the serial console or to switch on I2C/Wire Fast Mode
-// PlatformIO: Set it in platform.ini (debug_flags)
-//#define WIRE_FAST_MODE	
+//#define WIRE_FAST_MODE
 //#define PRINT_TIME_SERIAL
 //#define DEBUG_DCF77CONTROL               
 //#define DEBUG_ISR
@@ -94,12 +98,12 @@
 //////////////////////////////////////////////////
 // Global constants and variables
 //////////////////////////////////////////////////
-
-#if defined(__AVR_ATtinyX8__)
-constexpr uint8_t DCF77_ON_OFF_PIN = 14;            // Switch DCF77 Receiver on or off
-#else
+#if defined(DEV_BOARD)
 constexpr uint8_t DCF77_ON_OFF_PIN = 6;             // Switch DCF77 Receiver on or off
+#else
+constexpr uint8_t DCF77_ON_OFF_PIN = 14;            // Switch DCF77 Receiver on or off
 #endif
+
 constexpr uint32_t DCF77_SLEEP = 1790U;             // Period (in seconds) for which the radio clock is switched off. Here 1790 Seconds.
 
 // int1_second is just a counter that increases every second.
@@ -269,7 +273,7 @@ bool rtcNeedsSync() {
                   dcf77.getBcdDay(),
                   dcf77.getBcdHours(), 
                   dcf77.getBcdMinutes(), 
-                  1
+                  1                         // Second.
       );
 #ifdef DEBUG_DCF77CONTROL
       Serial.println(F("set RTC"));
@@ -337,17 +341,17 @@ void optimizePowerConsumption(void) {
     // Pin A4 PC4    Used PC -> 0011 0000  
     // Pin A5 PC5
 
-#if defined(__AVR_ATtinyX8__)
-    #define PORTSB 0x6F
-#else 
+#if defined(DEV_BOARD)
     #define PORTSB 0x2F
+#else 
+    #define PORTSB 0x6F
 #endif
     #define PORTSC 0x30  
 
-#if defined(__AVR_ATtinyX8__)
-    #define PORTSD 0xBC 
-#else
+#if defined(DEV_BOARD)
     #define PORTSD 0xFC
+#else
+    #define PORTSD 0xBC 
 #endif 
 
     DDRB &= (PORTSB);  
