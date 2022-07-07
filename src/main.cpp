@@ -308,9 +308,9 @@ void optimizePowerConsumption(void) {
     DIDR0 |= 0xC0 ;   //ADC7D and ADC6D are undefined in header file so set bits this way
  
     // Disable digital input buffer on Analog comparator pins 
-    DIDR1 |= (1 << AIN1D) | (1 << AIN0D);
+    DIDR1 |= bit(AIN1D) | bit(AIN0D);
     // Disable Analog Comparator 
-    ACSR |= (1 << ACD);
+    ACSR |= bit(ACD);
  
     // Power shutdown to unused peripherals (Only Atmega328PB / ATTINY88)
     #if defined(__AVR_ATtinyX8__) || defined(__AVR_ATmega328P__)
@@ -364,8 +364,8 @@ void optimizePowerConsumption(void) {
     
     cli();                             // Disable interrupts
     // turn off brown-out enable in software
-    MCUCR = bit (BODS) | bit (BODSE);  // turn on brown-out enable select
-    MCUCR = bit (BODS);                // this must be done within 4 clock cycles of above
+    MCUCR = bit(BODS) | bit(BODSE);  // turn on brown-out enable select
+    MCUCR = bit(BODS);                // this must be done within 4 clock cycles of above
 
     // Watchdog Timer OFF
     wdt_reset();                       // Reset watchdog timer 
