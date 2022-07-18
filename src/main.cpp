@@ -99,16 +99,16 @@
 // Global constants and variables
 //////////////////////////////////////////////////
 #if defined(DEV_BOARD)
-constexpr uint8_t DCF77_ON_OFF_PIN = 6;             // Switch DCF77 Receiver on or off
+constexpr uint8_t DCF77_ON_OFF_PIN  {6};            // Switch DCF77 Receiver on or off
 #else
-constexpr uint8_t DCF77_ON_OFF_PIN = 14;            // Switch DCF77 Receiver on or off
+constexpr uint8_t DCF77_ON_OFF_PIN  {14};           // Switch DCF77 Receiver on or off
 #endif
 
-constexpr uint32_t DCF77_SLEEP = 1790U;             // Period (in seconds) for which the radio clock is switched off. Here 1790 Seconds.
+constexpr uint32_t DCF77_SLEEP      {1790U};        // Period (in seconds) for which the radio clock is switched off. Here 1790 Seconds.
 
 // int1_second is just a counter that increases every second.
 // It is not necessarily in sync with the RTC seconds
-volatile uint8_t  int1_second=0;                    // Second Tick in loop(), set in INT1
+volatile uint8_t  int1_second {0};                  // Second Tick in loop(), set in INT1
 
 DCF77Clock dcf77;
 dogm_7036 lcd;
@@ -173,16 +173,17 @@ void setup () {
 /// 
 //////////////////////////////////////////////////////////////////////////////
 void loop () {
-  static uint8_t tickSecond = 61;                       // 61 to prevent initial tickSecond = int1_second.
   static Separators timeSeparator;                      // Index for separator chars (display).
-  static bool showDate = false;
-  static bool dcf77PoweredOn = true;
+  static uint8_t tickSecond {LEAP_SECOND+1};            // 61 to prevent initial tickSecond = int1_second.
+  static bool showDate              {false};
+  static bool dcf77PoweredOn         {true};
 #ifndef DEBUG_ENABLED
-  static uint8_t dateVisibleOffTime = 0;
-  static uint32_t dcf77SleepCounter = 0;
+  static uint8_t dateVisibleOffTime     {0};
+  static uint32_t dcf77SleepCounter     {0};
 #endif
+
   if (dcf77PoweredOn) {
-    if (!rtcNeedsSync()) {                              // If rtcHasToSync() returns 0 (false) both clocks are synchronous.
+    if (!rtcNeedsSync()) {                              // If returns 0 (false) both clocks are synchronous.
 #ifndef DEBUG_ENABLED
       digitalWriteFast(DCF77_ON_OFF_PIN, HIGH);         // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
       dcf77PoweredOn = false;
@@ -191,7 +192,8 @@ void loop () {
     } else {
       timeSeparator = Separators::SEP_SPACE;
     }
-  } 
+  }
+ 
 #ifndef DEBUG_ENABLED
   if (dtButton.tic() != ButtonState::P_NONE) {
     showDate = true;
@@ -235,15 +237,25 @@ void loop () {
 /// @return false       There is no time difference. Both clocks are synchronous.
 //////////////////////////////////////////////////////////////////////////////
 bool rtcNeedsSync() {
-  bool rtcSetTime = true;
+  static bool locked {false};
+  decltype(rtcNeedsSync()) rtcSetTime {true};
   //
   // If the sequenceflag != MAX_SECOND  then the sequence was not received correctly, 
   // unless it is a leap second sequence.
   // In this case, the second counter must not be unequal to MAX_SECONDS + 1.
   //
   DCF77Sequence state = dcf77.getSequenceFlag(); 
-  if (state == MAX_SECONDS || (state == LEAP_SECOND && dcf77.getLeapSecond()) ) {
-    dcf77.decodeSequence();
+  if ( state == MAX_SECONDS || (state == LEAP_SECOND && dcf77.getLeapSecond()) ) {
+    // The getSequenceFlag() method is queried several times per second. However, the status 
+    // changes only every second. The variable "locked" ensures that the time check is executed only once.
+    if (locked) {
+      return rtcSetTime;
+    }   
+    locked = true;
+    // if the parity of the data sequence is not OK do nothing here.
+    if (!dcf77.decodeSequence()) {
+      return rtcSetTime;
+    }
     // Compare the DCF77 time with the RTC time. The RTC will only be set if there is a time difference.
     // Because only every full minute is checked, the dcf77 seconds are always 0.
     uint8_t dcf77Compare = dcf77.getMinutes() + dcf77.getHours();     
@@ -262,12 +274,14 @@ bool rtcNeedsSync() {
     Serial.println(dcf77Compare);
     Serial.print(F("Diff. RTC to DCF77 : "));
     Serial.println(timeCompareDiff);
+    Serial.print(F("Parity             : "));
+    Serial.println(parityOK);
 #endif
 
     // When timeCompareDiff is non-zero and not 59 at an hour change
     // there is a time difference -> set RTC Clock.
     if (timeCompareDiff && timeCompareDiff != HOUR_CHANGE) {
-      rtcSetTime = true;
+      //rtcSetTime = true;
       setDateTime(dcf77.getBcdYear(),
                   dcf77.getBcdMonth(),
                   dcf77.getBcdDay(),
@@ -281,7 +295,9 @@ bool rtcNeedsSync() {
     } else {
       rtcSetTime = false;
     }
-  } 
+  } else {
+    locked = false;
+  }
   return rtcSetTime;
 }
 

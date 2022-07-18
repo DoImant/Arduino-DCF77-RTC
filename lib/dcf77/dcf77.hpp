@@ -18,10 +18,10 @@
 
 #include <stdint.h>
 
-constexpr uint16_t THRESHOLD_DUR_MINUTE      = 1500;
-constexpr uint8_t  THRESHOLD_DUR_LONG_SIGNAL =  150;
-constexpr uint8_t  THRESHOLD_DUR_SHORT_SIGNAL =  85;
-constexpr uint8_t  HOUR_CHANGE = 59;
+constexpr uint16_t THRESHOLD_DUR_MINUTE      {1500};
+constexpr uint8_t  THRESHOLD_DUR_LONG_SIGNAL  {150};
+constexpr uint8_t  THRESHOLD_DUR_SHORT_SIGNAL  {85};
+constexpr uint8_t  HOUR_CHANGE {59};
 
 enum DCF77Sequence {SEQ_ERROR,
                     MAX_SECONDS=59U,

@@ -46,7 +46,7 @@
 
 #include <stdint.h>
 #include <SPI.h>
-#include <dogm_7036.h>
+#include "dogm_7036.h"
 #include "button.hpp"
 
 //////////////////////////////////////////////////
