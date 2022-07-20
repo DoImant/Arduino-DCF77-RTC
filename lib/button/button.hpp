@@ -30,9 +30,9 @@ constexpr uint8_t DEBOUNCE_VAL  {30};  // The value can be reduced for buttons t
 enum class ButtonState {P_NONE,P_SHORT,P_LONG};
 
 class Button {
-    uint8_t _pin;               // Button PIN number
-    uint16_t _isLong;           // Saves the time (in ms) from which a key press is recognized as long.
+    uint32_t _isLong;           // Saves the time (in ms) from which a key press is recognized as long.
     bool _activeState;          // Saves whether the buttons active state is HIGH or LOW.
+    uint8_t _pin;               // Button PIN number
     bool _state;                // Saves the actual state of the button.
     bool _prevState;            // Saves the previous state of the button.
     uint32_t _pressingTime;     // Saves the length of time that the button was pressed (ms).
@@ -46,15 +46,11 @@ class Button {
     /// @param isLong         // time from which a key press is recognized as long
     /// @param activeState    // LOW if the button is connected with a pull up, otherwise HIGH with a pull down resistor
     //////////////////////////////////////////////////////////////////////////////
-    Button(uint8_t pin = 2, uint16_t isLong = 1000, bool activeState=LOW) : 
-      _pin(pin), _isLong(isLong) ,_activeState(activeState) {
+    Button(decltype(_isLong) isLong = 1000, decltype(_activeState) activeState=LOW) : 
+      _isLong(isLong), _activeState(activeState) {
       _state = !_activeState;
-      if (_activeState) {                // ! is LOW
-        pinModeFast(_pin, INPUT);
-      } else {
-        pinModeFast(_pin, INPUT_PULLUP);
-      }
     }
+    void begin(uint8_t);
     ButtonState tic(void);
     uint32_t getDuration(void) const;
 };

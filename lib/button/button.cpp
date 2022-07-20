@@ -14,6 +14,20 @@
 #include "button.hpp"
 
 //////////////////////////////////////////////////////////////////////////////
+/// @brief Initialize the pin to which the pushbutton is connected
+/// 
+/// @param pinnr 
+//////////////////////////////////////////////////////////////////////////////
+void Button::begin(uint8_t pinnr) {
+  _pin = pinnr;
+  if (_activeState) {                // ! is LOW
+    pinModeFast(_pin, INPUT);
+  } else {
+    pinModeFast(_pin, INPUT_PULLUP);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 /// @brief The button query. The tic() method should be called in an endless loop.
 /// 
 /// @return ButtonState  The states are "Not pressed", "short pressed" and "long pressed"

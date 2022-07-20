@@ -113,8 +113,8 @@ volatile uint8_t  int1_second {0};                  // Second Tick in loop(), se
 DCF77Clock dcf77;
 dogm_7036 lcd;
 #ifndef DEBUG_ENABLED
-Button dtButton(BUTTON_DT_PIN);
-Button blButton(BUTTON_BL_PIN);
+Button dtButton;
+Button blButton;
 #endif
 
 //////////////////////////////////////////////////
@@ -143,7 +143,8 @@ void setup () {
   pinModeFast(BUTTON_BL_PIN, INPUT_PULLUP);
   pinModeFast(DCF77_ON_OFF_PIN, OUTPUT);
   digitalWriteFast(DCF77_ON_OFF_PIN, LOW);               // Switch DCF77 receiver on (P-Channel MOSFet as switch)
-  
+  dtButton.begin(BUTTON_DT_PIN);
+  blButton.begin(BUTTON_BL_PIN);
   // init DOGM-LCD
   initDisplay(lcd);
 
