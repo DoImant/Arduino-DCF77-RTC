@@ -143,8 +143,10 @@ void setup () {
   pinModeFast(BUTTON_BL_PIN, INPUT_PULLUP);
   pinModeFast(DCF77_ON_OFF_PIN, OUTPUT);
   digitalWriteFast(DCF77_ON_OFF_PIN, LOW);               // Switch DCF77 receiver on (P-Channel MOSFet as switch)
+#ifndef DEBUG_ENABLED
   dtButton.begin(BUTTON_DT_PIN);
   blButton.begin(BUTTON_BL_PIN);
+#endif
   // init DOGM-LCD
   initDisplay(lcd);
 

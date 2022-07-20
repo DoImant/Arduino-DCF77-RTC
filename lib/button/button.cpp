@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////
 void Button::begin(uint8_t pinnr) {
   _pin = pinnr;
-  if (_activeState) {                // ! is LOW
+  if (_activeState) {
     pinModeFast(_pin, INPUT);
   } else {
     pinModeFast(_pin, INPUT_PULLUP);
