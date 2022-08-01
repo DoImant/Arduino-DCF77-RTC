@@ -104,7 +104,7 @@ constexpr uint8_t DCF77_ON_OFF_PIN  {6};            // Switch DCF77 Receiver on 
 constexpr uint8_t DCF77_ON_OFF_PIN  {14};           // Switch DCF77 Receiver on or off
 #endif
 
-constexpr uint32_t DCF77_SLEEP      {1790U};        // Period (in seconds) for which the radio clock is switched off. Here 1790 Seconds.
+constexpr uint32_t DCF77_SLEEP      {3590};        // Period (in seconds) for which the radio clock is switched off. Here 3590 Seconds.
 
 // int1_second is just a counter that increases every second.
 // It is not necessarily in sync with the RTC seconds
@@ -140,7 +140,6 @@ void setup () {
   #endif
 #endif
 
-  pinModeFast(BUTTON_BL_PIN, INPUT_PULLUP);
   pinModeFast(DCF77_ON_OFF_PIN, OUTPUT);
   digitalWriteFast(DCF77_ON_OFF_PIN, LOW);               // Switch DCF77 receiver on (P-Channel MOSFet as switch)
 #ifndef DEBUG_ENABLED

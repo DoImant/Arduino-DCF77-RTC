@@ -20,10 +20,9 @@
 //////////////////////////////////////////////////////////////////////////////
 void Button::begin(uint8_t pinnr) {
   _pin = pinnr;
-  if (_activeState) {
-    pinModeFast(_pin, INPUT);
-  } else {
-    pinModeFast(_pin, INPUT_PULLUP);
+  switch(_activeState) {
+    case HIGH:  pinModeFast(_pin, INPUT); break;
+    case LOW:   pinModeFast(_pin, INPUT_PULLUP); break;
   }
 }
 
