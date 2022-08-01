@@ -47,11 +47,11 @@ void ClockData::setDateSeparator(Separators actSep) {
 void ClockData::setTime() {
   //Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
   *(_strTimeBuff+8) = '\0';
-  BCDConv::bcdTochar((_strTimeBuff+6),readRegister(DS3231_SECONDS));
+  BCDConv::bcdTochar((_strTimeBuff+6),DS3231::readRegister(DS3231::SECONDS));
   *(_strTimeBuff+5) = _separator[static_cast<uint8_t>(_actTimeSep)];
-  BCDConv::bcdTochar((_strTimeBuff+3),readRegister(DS3231_MINUTES));
+  BCDConv::bcdTochar((_strTimeBuff+3),DS3231::readRegister(DS3231::MINUTES));
   *(_strTimeBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_TIME)];
-  BCDConv::bcdTochar(_strTimeBuff,readRegister(DS3231_HOURS));
+  BCDConv::bcdTochar(_strTimeBuff,DS3231::readRegister(DS3231::HOURS));
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -60,14 +60,14 @@ void ClockData::setTime() {
 /// 
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setDate() {
-	BCDConv::bcdTochar(_strDateBuff,readRegister(DS3231_DATE));
+	BCDConv::bcdTochar(_strDateBuff,DS3231::readRegister(DS3231::DATE));
   *(_strDateBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
-  BCDConv::bcdTochar((_strDateBuff+3),readRegister(DS3231_CEN_MONTH));
+  BCDConv::bcdTochar((_strDateBuff+3),DS3231::readRegister(DS3231::CEN_MONTH));
   *(_strDateBuff+5) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
   // *(strDateBuff+6) = '2';                         //change it 2099 :-)
   // *(strDateBuff+7) = '0';
   //bcdTochar((strDateBuff+8),readRegister(DS3231_YEAR));
-  BCDConv::bcdTochar((_strDateBuff+6),readRegister(DS3231_YEAR));
+  BCDConv::bcdTochar((_strDateBuff+6),DS3231::readRegister(DS3231::YEAR));
   *(_strDateBuff+10) = '\0';
 }
 

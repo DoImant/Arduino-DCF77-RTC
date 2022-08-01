@@ -157,8 +157,8 @@ void setup () {
   // Init RTC
   Wire.begin();  
   Wire.setClock(WIRE_SPEED);
-  disable32kHz();
-  enableSw1Hz();
+  DS3231::disable32kHz();
+  DS3231::enableSw1Hz();
   attachInterrupt(digitalPinToInterrupt(PIND3), check1HzSig, RISING);
 #ifdef SET_TEST_TIME
   setDateTime(BCDConv::decToBcd(0),
@@ -262,9 +262,9 @@ bool rtcNeedsSync() {
     // Compare the DCF77 time with the RTC time. The RTC will only be set if there is a time difference.
     // Because only every full minute is checked, the dcf77 seconds are always 0.
     uint8_t dcf77Compare = dcf77.getMinutes() + dcf77.getHours();     
-    uint8_t rtcCompare =  BCDConv::bcdToDec(readRegister(DS3231_SECONDS)) + 
-                          BCDConv::bcdToDec(readRegister(DS3231_MINUTES)) + 
-                          BCDConv::bcdToDec(readRegister(DS3231_HOURS));
+    uint8_t rtcCompare =  BCDConv::bcdToDec(DS3231::readRegister(DS3231::SECONDS)) + 
+                          BCDConv::bcdToDec(DS3231::readRegister(DS3231::MINUTES)) + 
+                          BCDConv::bcdToDec(DS3231::readRegister(DS3231::HOURS));
     uint8_t timeCompareDiff = rtcCompare - dcf77Compare;
 
 #ifdef DEBUG_DCF77CONTROL       
@@ -285,13 +285,13 @@ bool rtcNeedsSync() {
     // there is a time difference -> set RTC Clock.
     if (timeCompareDiff && timeCompareDiff != HOUR_CHANGE) {
       //rtcSetTime = true;
-      setDateTime(dcf77.getBcdYear(),
-                  dcf77.getBcdMonth(),
-                  dcf77.getBcdDay(),
-                  dcf77.getBcdHours(), 
-                  dcf77.getBcdMinutes(), 
-                  1                         // Second.
-      );
+      DS3231::setDateTime(dcf77.getBcdYear(),
+                          dcf77.getBcdMonth(),
+                          dcf77.getBcdDay(),
+                          dcf77.getBcdHours(), 
+                          dcf77.getBcdMinutes(), 
+                          1                         // Second.
+                          );
 #ifdef DEBUG_DCF77CONTROL
       Serial.println(F("set RTC"));
 #endif
