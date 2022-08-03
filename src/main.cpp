@@ -160,13 +160,13 @@ void setup () {
   DS3231::enableSw1Hz();
   attachInterrupt(digitalPinToInterrupt(PIND3), check1HzSig, RISING);
 #ifdef SET_TEST_TIME
-  setDateTime(BCDConv::decToBcd(0),
-              BCDConv::decToBcd(1),
-              BCDConv::decToBcd(1),
-              BCDConv::decToBcd(17),
-              BCDConv::decToBcd(1),
-              BCDConv::decToBcd(15)
-              ); // Reset RTC for testing purposes
+  DS3231::setDateTime(BCDConv::decToBcd(0),
+                      BCDConv::decToBcd(1),
+                      BCDConv::decToBcd(1),
+                      BCDConv::decToBcd(17),
+                      BCDConv::decToBcd(1),
+                      BCDConv::decToBcd(15)
+                      ); // Reset RTC for testing purposes
 #endif
 }
 
@@ -179,29 +179,27 @@ void loop () {
   static uint8_t tickSecond {LEAP_SECOND+1};            // 61 to prevent initial tickSecond = int1_second.
   static bool showDate              {false};
   static bool dcf77PoweredOn         {true};
-#ifndef DEBUG_ENABLED
+  #ifndef DEBUG_ENABLED
   static uint8_t dateVisibleOffTime     {0};
   static uint32_t dcf77SleepCounter     {0};
 #endif
 
   if (dcf77PoweredOn) {
-    if (!rtcNeedsSync()) {                              // If returns 0 (false) both clocks are synchronous.
-#ifndef DEBUG_ENABLED
+    if(!rtcNeedsSync()) {                               // If returns 0 (false) both clocks are synchronous.
+    #ifndef DEBUG_ENABLED
       digitalWriteFast(DCF77_ON_OFF_PIN, HIGH);         // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
       dcf77PoweredOn = false;
-#endif
+    #endif
       timeSeparator = Separators::SEP_COLUP;
-    } else {
-      timeSeparator = Separators::SEP_SPACE;
     }
   }
- 
+
 #ifndef DEBUG_ENABLED
   if (dtButton.tic() != ButtonState::P_NONE) {
     showDate = true;
     printRtcTime(lcd, timeSeparator, showDate);         // Don't wait until the next second after the button is pressed to show the date.
-  }            
-  switchBacklight(int1_second, blButton.tic());         // Switch backlight on if button has been pressed.
+  }          
+  switchBacklight(int1_second, blButton.tic());           // Switch backlight on if button has been pressed.
 #endif
 
   // Do the following every second.
@@ -210,6 +208,7 @@ void loop () {
   // The clock comes from the 1Hz signal of the RTC which is present at the INT1 pin.
   if ( int1_second != tickSecond) {
     tickSecond = int1_second;
+
 #ifndef DEBUG_ENABLED
     if (!dcf77PoweredOn) {                              
       ++dcf77SleepCounter;
@@ -217,6 +216,7 @@ void loop () {
         digitalWriteFast(DCF77_ON_OFF_PIN, LOW);        // Switch DCFAvtive-Pin - Clock ON
         dcf77PoweredOn = true;
         dcf77SleepCounter = 0;
+        timeSeparator = Separators::SEP_SPACE;
       }
     } 
     if (showDate) {
@@ -239,7 +239,6 @@ void loop () {
 /// @return false       There is no time difference. Both clocks are synchronous.
 //////////////////////////////////////////////////////////////////////////////
 bool rtcNeedsSync() {
-  static bool locked {false};
   decltype(rtcNeedsSync()) rtcSetTime {true};
   //
   // If the sequenceflag != MAX_SECOND  then the sequence was not received correctly, 
@@ -248,58 +247,48 @@ bool rtcNeedsSync() {
   //
   DCF77Sequence state = dcf77.getSequenceFlag(); 
   if ( state == MAX_SECONDS || (state == LEAP_SECOND && dcf77.getLeapSecond()) ) {
-    // The getSequenceFlag() method is queried several times per second. However, the status 
-    // changes only every second. The variable "locked" ensures that the time check is executed only once.
-    if (locked) {
-      return rtcSetTime;
-    }   
-    locked = true;
-    // if the parity of the data sequence is not OK do nothing here.
-    if (!dcf77.decodeSequence()) {
-      return rtcSetTime;
-    }
-    // Compare the DCF77 time with the RTC time. The RTC will only be set if there is a time difference.
-    // Because only every full minute is checked, the dcf77 seconds are always 0.
-    uint8_t dcf77Compare = dcf77.getMinutes() + dcf77.getHours();     
-    uint8_t rtcCompare =  BCDConv::bcdToDec(DS3231::readRegister(DS3231::SECONDS)) + 
-                          BCDConv::bcdToDec(DS3231::readRegister(DS3231::MINUTES)) + 
-                          BCDConv::bcdToDec(DS3231::readRegister(DS3231::HOURS));
-    uint8_t timeCompareDiff = rtcCompare - dcf77Compare;
 
-#ifdef DEBUG_DCF77CONTROL       
-    Serial.println("");
-    Serial.print(F("int1_second        : "));
-    Serial.println(int1_second);
-    Serial.print(F("RTC   Compare Value: "));
-    Serial.println(rtcCompare);
-    Serial.print(F("DCF77 Compare Value: "));
-    Serial.println(dcf77Compare);
-    Serial.print(F("Diff. RTC to DCF77 : "));
-    Serial.println(timeCompareDiff);
-    Serial.print(F("Parity             : "));
-    Serial.println(parityOK);
-#endif
+    switch(dcf77.decodeSequence()) {
+      case false: break;    // if the parity of the data sequence is not OK do nothing here.
 
-    // When timeCompareDiff is non-zero and not 59 at an hour change
-    // there is a time difference -> set RTC Clock.
-    if (timeCompareDiff && timeCompareDiff != HOUR_CHANGE) {
-      //rtcSetTime = true;
-      DS3231::setDateTime(dcf77.getBcdYear(),
-                          dcf77.getBcdMonth(),
-                          dcf77.getBcdDay(),
-                          dcf77.getBcdHours(), 
-                          dcf77.getBcdMinutes(), 
-                          1                         // Second.
-                          );
-#ifdef DEBUG_DCF77CONTROL
-      Serial.println(F("set RTC"));
-#endif
-    } else {
-      rtcSetTime = false;
-    }
-  } else {
-    locked = false;
-  }
+      // Compare the DCF77 time with the RTC time. The RTC will only be set if there is a time difference
+      // Because only every full minute is checked, the dcf77 seconds are always 0.
+      case true:  uint8_t dcf77Compare = dcf77.getMinutes() + dcf77.getHours();     
+                  uint8_t rtcCompare =  BCDConv::bcdToDec(DS3231::readRegister(DS3231::SECONDS)) + 
+                                        BCDConv::bcdToDec(DS3231::readRegister(DS3231::MINUTES)) + 
+                                        BCDConv::bcdToDec(DS3231::readRegister(DS3231::HOURS));
+                  uint8_t timeCompareDiff = rtcCompare - dcf77Compare;
+
+              #ifdef DEBUG_DCF77CONTROL       
+                  Serial.println("");
+                  Serial.print(F("int1_second        : "));
+                  Serial.println(int1_second);
+                  Serial.print(F("RTC   Compare Value: "));
+                  Serial.println(rtcCompare);
+                  Serial.print(F("DCF77 Compare Value: "));
+                  Serial.println(dcf77Compare);
+                  Serial.print(F("Diff. RTC to DCF77 : "));
+                  Serial.println(timeCompareDiff);
+                  Serial.print(F("Parity             : "));
+                  Serial.println(parityOK);
+              #endif
+                  // When timeCompareDiff is non-zero and not 59 at an hour change
+                  // there is a time difference -> set RTC Clock.
+                  switch(timeCompareDiff && timeCompareDiff != HOUR_CHANGE) {
+                    case true:  DS3231::setDateTime(dcf77.getBcdYear(),
+                                        dcf77.getBcdMonth(),
+                                        dcf77.getBcdDay(),
+                                        dcf77.getBcdHours(), 
+                                        dcf77.getBcdMinutes(), 
+                                        1                         // Second.
+                                        );
+                                        // no break! 
+                    case false: rtcSetTime = false;
+                                break;
+                  } // Switch2
+                  break;
+    } // Switch1
+  } 
   return rtcSetTime;
 }
 

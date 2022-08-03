@@ -52,20 +52,20 @@
 //////////////////////////////////////////////////
 // Global constants and variables
 //////////////////////////////////////////////////
-constexpr uint8_t PIN_RS = 7;                           // RS = Read/Write Data from/to RAM (Pin 39)
-constexpr uint8_t PIN_RST = 8;                          // Reset des Displays (Pin 40)
-constexpr uint8_t PIN_BACKLIGHT = 9;                    // Pin (D9) for backlight brightness control
-constexpr uint8_t BUTTON_BL_PIN = 4;                    // Pin (D4) for switching the backlight on
-constexpr uint8_t BUTTON_DT_PIN = 5;                    // Pin (D5) for switching the date view on the Display
+constexpr uint8_t PIN_RS          {7};                    // RS = Read/Write Data from/to RAM (Pin 39)
+constexpr uint8_t PIN_RST         {8};                    // Reset des Displays (Pin 40)
+constexpr uint8_t PIN_BACKLIGHT   {9};                    // Pin (D9) for backlight brightness control
+constexpr uint8_t BUTTON_BL_PIN   {4};                    // Pin (D4) for switching the backlight on
+constexpr uint8_t BUTTON_DT_PIN   {5};                    // Pin (D5) for switching the date view on the Display
 
 // PWM duty cycles for brightness: 0 = off, 255 = max. brightness 
-constexpr uint8_t BL_BRIGHTNESS_OFF = 0;    
-constexpr uint8_t BL_BRIGHTNESS_ON = 16;    
-constexpr uint8_t BL_BURN_DURATION = 10;                // Time in sec
+constexpr uint8_t BL_BRIGHTNESS_OFF    {0};    
+constexpr uint8_t BL_BRIGHTNESS_ON    {16};    
+constexpr uint8_t BL_BURN_DURATION    {10};                // Time in sec
 
-constexpr uint8_t SHOW_DATE_DURATION = 10;              // Time in sec 
-constexpr uint8_t MINUTE             = 60;              
-constexpr uint8_t MINUTE_IMPOSSIBLE  = 61;              
+constexpr uint8_t SHOW_DATE_DURATION  {10};              // Time in sec 
+constexpr uint8_t MINUTE              {60};              
+constexpr uint8_t MINUTE_IMPOSSIBLE   {61};              
 
 //////////////////////////////////////////////////
 // Class definitions
@@ -90,14 +90,15 @@ public:
   void setDate(void);
   const char* getTime() const; 
   const char* getDate() const;
+  const Separators getTimeSeparator() const; 
 };
 
 //////////////////////////////////////////////////
 // Function forward declaration
 //////////////////////////////////////////////////
-void initDisplay(dogm_7036& disp);
-void monoBacklight(byte brightness);
-void printRtcTime(dogm_7036& disp, Separators& tSep, bool dateVisible);
-void switchBacklight(uint8_t second, ButtonState blButtonPressed);
+void initDisplay(dogm_7036&);
+void monoBacklight(byte);
+void printRtcTime(dogm_7036&, Separators&, bool);
+void switchBacklight(uint8_t, ButtonState);
 
 #endif

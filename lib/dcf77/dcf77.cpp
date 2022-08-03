@@ -214,6 +214,7 @@ bool DCF77Clock::decodeSequence() {
 #endif
   }
   _sequenceBuffer = 0;
+  _sequenceFlag = DCF77Sequence::SEQ_ERROR;   // Prevents multiple evaluation of the time sequence in too short time intervals
 
 #ifdef DEBUG_DCF77_SEQ
   Serial.print(F("Ls: "));
