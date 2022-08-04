@@ -28,7 +28,7 @@
 /// @param idx          Position in memory array
 //////////////////////////////////////////////////////////////////////////////
 void ClockSeparators::setTimeSeparator(Separators timeSep_, uint8_t idx) {
-   if (idx > arraySize(timeSep)-1) idx = arraySize(timeSep)-1;
+  if (idx > arraySize(timeSep)-1) idx = arraySize(timeSep)-1;
   timeSep[idx] = timeSep_;
 }
 //////////////////////////////////////////////////////////////////////////////
@@ -105,9 +105,9 @@ const char* ClockData::getDate() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// @brief Returns a reference to the MoisturMeter object.
+/// @brief Returns a reference to the ClockSeperator object.
 /// 
-/// @return const MoistureMeter& 
+/// @return ClockSeparator& 
 //////////////////////////////////////////////////////////////////////////////
 ClockSeparators &ClockData::clockSeparator() {
   return separator;
