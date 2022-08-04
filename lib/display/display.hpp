@@ -61,36 +61,63 @@ constexpr uint8_t BUTTON_DT_PIN   {5};                    // Pin (D5) for switch
 // PWM duty cycles for brightness: 0 = off, 255 = max. brightness 
 constexpr uint8_t BL_BRIGHTNESS_OFF    {0};    
 constexpr uint8_t BL_BRIGHTNESS_ON    {16};    
-constexpr uint8_t BL_BURN_DURATION    {10};                // Time in sec
+constexpr uint8_t BL_BURN_DURATION    {10};               // Time in sec
 
-constexpr uint8_t SHOW_DATE_DURATION  {10};              // Time in sec 
+constexpr uint8_t SHOW_DATE_DURATION  {10};               // Time in sec 
 constexpr uint8_t MINUTE              {60};              
 constexpr uint8_t MINUTE_IMPOSSIBLE   {61};              
 
 //////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////
-enum class Separators {SEP_SPACE, SEP_TIME, SEP_DATE, SEP_COLUP, SEP_COLDOWN};
+enum class Separators : uint8_t {SPACE, TIME, DATE, COLUP, COLDOWN};
 
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Class for handling separators in time- 
+///        and date display (HH:MM:SS / 01-01-22)
+/// 
+//////////////////////////////////////////////////////////////////////////////
+class ClockSeparators {
+private:
+  Separators dateSep;
+  Separators timeSep[2]      {Separators::SPACE, Separators::COLDOWN};
+  const uint8_t separator[5] {' ',':','-',0x01,0x02};             // 0x01 and 0x02 are self defined chars set in initDisplay
+
+public:
+  ClockSeparators(Separators dateSep_ = Separators::DATE):
+  dateSep{dateSep_} {} 
+  ClockSeparators(const ClockSeparators&) = delete;               // prevent copy
+  ClockSeparators& operator=(const  ClockSeparators&) = delete;   // prevent assignment
+
+  template<size_t size, class T> inline size_t arraySize(T (&arr)[size]) const {
+    return size;
+  }
+
+  void setTimeSeparator(Separators, uint8_t);
+  void setDateSeparator(Separators);
+  Separators getTimeSeparator(uint8_t idx) const;
+  uint8_t getSeparatorChar(Separators sep) const;
+};
+
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Class to handle the time and date strings
+/// 
+//////////////////////////////////////////////////////////////////////////////
 class ClockData {
 private:
-  char _strTimeBuff[9];
-  char _strDateBuff[9];
-	unsigned char _separator[5] = {' ',':','-',0x01,0x02}; 
-  Separators _actTimeSep;
-  Separators _actDateSep;	
-	
+  ClockSeparators separator;
+  char _strTimeBuff[9] {0};
+  char _strDateBuff[9] {0};
+ 		
 public:
-  ClockData(Separators actTimeSep = Separators::SEP_TIME, Separators actDateSep = Separators::SEP_DATE)
-    : _actTimeSep(actTimeSep), _actDateSep(actDateSep) {}
-	
-  void setTimeSeparator(Separators);
-  void setDateSeparator(Separators);
+  ClockData() {}
+  ClockData(const ClockData&) = delete;               // prevent copy
+  ClockData& operator=(const  ClockData&) = delete;   // prevent assignment
   void setTime(void);
   void setDate(void);
   const char* getTime() const; 
   const char* getDate() const;
-  const Separators getTimeSeparator() const; 
+  ClockSeparators &clockSeparator();
 };
 
 //////////////////////////////////////////////////
@@ -98,7 +125,7 @@ public:
 //////////////////////////////////////////////////
 void initDisplay(dogm_7036&);
 void monoBacklight(byte);
-void printRtcTime(dogm_7036&, Separators&, bool);
+void printRtcTime(dogm_7036&, ClockData&, bool);
 void switchBacklight(uint8_t, ButtonState);
 
 #endif

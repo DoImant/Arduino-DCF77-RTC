@@ -25,14 +25,14 @@
 // Initialize static class variables 
 //////////////////////////////////////////////////
 
-uint8_t DCF77Receive::_intPin  {PIND2};
-bool DCF77Receive::_activeLow  {false};
-uint8_t DCF77Receive::_seconds     {0};
-uint16_t DCF77Receive::_duration   {0};
-uint32_t DCF77Receive::_lastInt    {0};
-bool DCF77Receive::_longSig    {false};
-uint64_t DCF77Receive::_sequenceBuffer             {0};
-DCF77Sequence  DCF77Receive::_sequenceFlag {SEQ_ERROR};
+uint8_t DCF77Receive::_intPin               {PIND2};
+bool DCF77Receive::_activeLow               {false};
+uint8_t DCF77Receive::_seconds              {0};
+uint16_t DCF77Receive::_duration            {0};
+uint32_t DCF77Receive::_lastInt             {0};
+bool DCF77Receive::_longSig                 {false};
+uint64_t DCF77Receive::_sequenceBuffer      {0};
+DCF77Sequence  DCF77Receive::_sequenceFlag  {SEQ_ERROR};
 
 // Methods of DCF77Receive  //////////////////////////////////////////////////
 

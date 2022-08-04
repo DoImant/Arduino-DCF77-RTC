@@ -111,7 +111,9 @@ constexpr uint32_t DCF77_SLEEP      {3590};        // Period (in seconds) for wh
 volatile uint8_t  int1_second {0};                  // Second Tick in loop(), set in INT1
 
 DCF77Clock dcf77;
+ClockData clockData;
 dogm_7036 lcd;
+
 #ifndef DEBUG_ENABLED
 Button dtButton;
 Button blButton;
@@ -175,7 +177,6 @@ void setup () {
 /// 
 //////////////////////////////////////////////////////////////////////////////
 void loop () {
-  static Separators timeSeparator;                      // Index for separator chars (display).
   static uint8_t tickSecond {LEAP_SECOND+1};            // 61 to prevent initial tickSecond = int1_second.
   static bool showDate              {false};
   static bool dcf77PoweredOn         {true};
@@ -190,16 +191,16 @@ void loop () {
       digitalWriteFast(DCF77_ON_OFF_PIN, HIGH);         // If both clocks synchronous switch dcf77 clock off for the DCF77_SLEEP time.
       dcf77PoweredOn = false;
     #endif
-      timeSeparator = Separators::SEP_COLUP;
+      clockData.clockSeparator().setTimeSeparator(Separators::COLUP,0);
     }
   }
 
 #ifndef DEBUG_ENABLED
   if (dtButton.tic() != ButtonState::P_NONE) {
     showDate = true;
-    printRtcTime(lcd, timeSeparator, showDate);         // Don't wait until the next second after the button is pressed to show the date.
+    printRtcTime(lcd, clockData, showDate);         // Don't wait until the next second after the button is pressed to show the date.
   }          
-  switchBacklight(int1_second, blButton.tic());           // Switch backlight on if button has been pressed.
+  switchBacklight(int1_second, blButton.tic());         // Switch backlight on if button has been pressed.
 #endif
 
   // Do the following every second.
@@ -216,7 +217,7 @@ void loop () {
         digitalWriteFast(DCF77_ON_OFF_PIN, LOW);        // Switch DCFAvtive-Pin - Clock ON
         dcf77PoweredOn = true;
         dcf77SleepCounter = 0;
-        timeSeparator = Separators::SEP_SPACE;
+        clockData.clockSeparator().setTimeSeparator(Separators::SPACE,0);
       }
     } 
     if (showDate) {
@@ -228,7 +229,7 @@ void loop () {
       }
     }
 #endif
-    printRtcTime(lcd,timeSeparator, showDate);
+    printRtcTime(lcd, clockData, showDate);
   } 
 }
 

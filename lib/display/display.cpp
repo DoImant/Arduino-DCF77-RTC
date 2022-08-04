@@ -19,24 +19,37 @@
 #include "DS3231Wire.h"
 #include "digitalWriteFast.h"
 
-// Methods of ClockData //////////////////////////////////////////////////////
+// Methods of ClockSeparators //////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////
-/// @brief Sets the separator for the time display.
+/// @brief Stores an index value for the time separator.
 /// 
-/// @param actSep 
+/// @param timeSep_     Separators enum value
+/// @param idx          Position in memory array
 //////////////////////////////////////////////////////////////////////////////
-void ClockData::setTimeSeparator(Separators actSep) {
-  _actTimeSep = actSep;
+void ClockSeparators::setTimeSeparator(Separators timeSep_, uint8_t idx) {
+   if (idx > arraySize(timeSep)-1) idx = arraySize(timeSep)-1;
+  timeSep[idx] = timeSep_;
+}
+//////////////////////////////////////////////////////////////////////////////
+/// @brief Returns a stored index value for the time separator...
+/// 
+/// @param idx (can be 0 or 1)
+/// @return Separators 
+//////////////////////////////////////////////////////////////////////////////
+Separators ClockSeparators::getTimeSeparator(uint8_t idx) const {
+  if (idx > arraySize(timeSep)-1) idx = arraySize(timeSep)-1;
+  return timeSep[idx];
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// @brief Sets the separator for the Date display.
+/// @brief Returns the separator for the time display.
 /// 
-/// @param actSep 
+/// @param sep 
+/// @return uint8_t 
 //////////////////////////////////////////////////////////////////////////////
-void ClockData::setDateSeparator(Separators actSep) {
-  _actDateSep = actSep;
+uint8_t ClockSeparators::getSeparatorChar(Separators sep) const {
+  return separator[static_cast<uint8_t>(sep)];
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -45,12 +58,14 @@ void ClockData::setDateSeparator(Separators actSep) {
 /// 
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setTime() {
+  static bool switchSep = true;
   //Looks complicated, but it saves many flash space (-1.5Kb) compared to sprintf.
   *(_strTimeBuff+8) = '\0';
   BCDConv::bcdTochar((_strTimeBuff+6),DS3231::readRegister(DS3231::SECONDS));
-  *(_strTimeBuff+5) = _separator[static_cast<uint8_t>(_actTimeSep)];
+  *(_strTimeBuff+5) = separator.getSeparatorChar(separator.getTimeSeparator(switchSep));
+  switchSep = !switchSep;
   BCDConv::bcdTochar((_strTimeBuff+3),DS3231::readRegister(DS3231::MINUTES));
-  *(_strTimeBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_TIME)];
+  *(_strTimeBuff+2) = separator.getSeparatorChar(Separators::TIME);
   BCDConv::bcdTochar(_strTimeBuff,DS3231::readRegister(DS3231::HOURS));
 }
 
@@ -61,9 +76,9 @@ void ClockData::setTime() {
 //////////////////////////////////////////////////////////////////////////////
 void ClockData::setDate() {
 	BCDConv::bcdTochar(_strDateBuff,DS3231::readRegister(DS3231::DATE));
-  *(_strDateBuff+2) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
+  *(_strDateBuff+2) = separator.getSeparatorChar(Separators::DATE);
   BCDConv::bcdTochar((_strDateBuff+3),DS3231::readRegister(DS3231::CEN_MONTH));
-  *(_strDateBuff+5) = _separator[static_cast<uint8_t>(Separators::SEP_DATE)];
+  *(_strDateBuff+5) = separator.getSeparatorChar(Separators::DATE);
   // *(strDateBuff+6) = '2';                         //change it 2099 :-)
   // *(strDateBuff+7) = '0';
   //bcdTochar((strDateBuff+8),readRegister(DS3231_YEAR));
@@ -90,12 +105,12 @@ const char* ClockData::getDate() const {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-/// @brief Returns the separator for the time display.
+/// @brief Returns a reference to the MoisturMeter object.
 /// 
-/// @return Separators  Enum 
+/// @return const MoistureMeter& 
 //////////////////////////////////////////////////////////////////////////////
-const Separators ClockData::getTimeSeparator() const {
-  return _actTimeSep;
+ClockSeparators &ClockData::clockSeparator() {
+  return separator;
 }
 
 // ClockData End /////////////////////////////////////////////////////////////
@@ -163,22 +178,18 @@ void switchBacklight(uint8_t second, ButtonState blButtonPressed ) {
 /// 
 /// @param rtcTime 
 //////////////////////////////////////////////////////////////////////////////
-void printRtcTime(dogm_7036& disp, Separators& tSep, bool dateVisible) {
-  ClockData cd;
-  static bool switchSep = true;
-
-  if (dateVisible) {
-		cd.setDate();
-    disp.position(1,1);
-    disp.string(cd.getDate());
-  } else {
-    cd.setTimeSeparator((switchSep) ? tSep : Separators::SEP_COLDOWN);
-    switchSep = !switchSep;
-		cd.setTime();
-    disp.position(1,1);
-    disp.string(cd.getTime()); 
+void printRtcTime(dogm_7036& disp, ClockData& cd, bool dateVisible) {
+  switch(dateVisible) {
+    case true:
+      cd.setDate();
+      disp.position(1,1);
+      disp.string(cd.getDate());
+      break;
+    default:
+      cd.setTime();
+      disp.position(1,1);
+      disp.string(cd.getTime()); 
   }
-
 #ifdef PRINT_TIME_SERIAL
   Serial.print("Time is ");
   Serial.print(cd.getDate());

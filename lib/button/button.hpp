@@ -27,7 +27,7 @@ constexpr uint8_t DEBOUNCE_VAL  {30};  // The value can be reduced for buttons t
 //////////////////////////////////////////////////
 // Variables and Classdefinitions
 //////////////////////////////////////////////////
-enum class ButtonState {P_NONE,P_SHORT,P_LONG};
+enum class ButtonState : uint8_t {P_NONE,P_SHORT,P_LONG};
 
 class Button {
     uint32_t _isLong;           // Saves the time (in ms) from which a key press is recognized as long.
