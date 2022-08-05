@@ -79,13 +79,12 @@ enum class Separators : uint8_t {SPACE, TIME, DATE, COLUP, COLDOWN};
 //////////////////////////////////////////////////////////////////////////////
 class ClockSeparators {
 private:
-  Separators dateSep;
+  Separators dateSep         {Separators::DATE};
   Separators timeSep[2]      {Separators::SPACE, Separators::COLDOWN};
   const uint8_t separator[5] {' ',':','-',0x01,0x02};             // 0x01 and 0x02 are self defined chars set in initDisplay
 
 public:
-  ClockSeparators(Separators dateSep_ = Separators::DATE):
-  dateSep{dateSep_} {} 
+  ClockSeparators() {} 
   ClockSeparators(const ClockSeparators&) = delete;               // prevent copy
   ClockSeparators& operator=(const  ClockSeparators&) = delete;   // prevent assignment
 

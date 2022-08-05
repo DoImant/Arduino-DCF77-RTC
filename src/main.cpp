@@ -90,13 +90,13 @@
 #endif
 
 #ifdef WIRE_FAST_MODE
-  #define WIRE_SPEED 400000U          // I2C Fast Mode
+constexpr uint32_t WIRE_SPEED {400000};             // I2C Fast Mode
 #else
-  #define WIRE_SPEED 100000U          // I2C Normal Mode
+constexpr uint32_t WIRE_SPEED {100000};             // I2C Normal Mode
 #endif
 
 //////////////////////////////////////////////////
-// Global constants and variables
+// Global constants and variables / objects
 //////////////////////////////////////////////////
 #if defined(DEV_BOARD)
 constexpr uint8_t DCF77_ON_OFF_PIN  {6};            // Switch DCF77 Receiver on or off
@@ -104,7 +104,7 @@ constexpr uint8_t DCF77_ON_OFF_PIN  {6};            // Switch DCF77 Receiver on 
 constexpr uint8_t DCF77_ON_OFF_PIN  {14};           // Switch DCF77 Receiver on or off
 #endif
 
-constexpr uint32_t DCF77_SLEEP      {3590};        // Period (in seconds) for which the radio clock is switched off. Here 3590 Seconds.
+constexpr uint32_t DCF77_SLEEP      {3590};         // Period (in seconds) for which the radio clock is switched off. Here 3590 Seconds.
 
 // int1_second is just a counter that increases every second.
 // It is not necessarily in sync with the RTC seconds
@@ -122,7 +122,6 @@ Button blButton;
 //////////////////////////////////////////////////
 // Function forward declaration
 //////////////////////////////////////////////////
-
 void optimizePowerConsumption(void);
 bool rtcNeedsSync(void);
 void check1HzSig(void);
@@ -198,7 +197,7 @@ void loop () {
 #ifndef DEBUG_ENABLED
   if (dtButton.tic() != ButtonState::P_NONE) {
     showDate = true;
-    printRtcTime(lcd, clockData, showDate);         // Don't wait until the next second after the button is pressed to show the date.
+    printRtcTime(lcd, clockData, showDate);             // Don't wait until the next second after the button is pressed to show the date.
   }          
   switchBacklight(int1_second, blButton.tic());         // Switch backlight on if button has been pressed.
 #endif
@@ -221,12 +220,12 @@ void loop () {
       }
     } 
     if (showDate) {
-      if (dateVisibleOffTime < SHOW_DATE_DURATION) {
-         ++dateVisibleOffTime;
-      } else {
-        showDate = false;                               // showDate becomes false when the display time for the date has passed.
-        dateVisibleOffTime = 0;
-      }
+      switch (dateVisibleOffTime < SHOW_DATE_DURATION) {
+        case true:  ++dateVisibleOffTime;
+                    break;
+        case false: showDate = false;                   // showDate becomes false when the display time for the date has passed.
+                    dateVisibleOffTime = 0;
+      } 
     }
 #endif
     printRtcTime(lcd, clockData, showDate);
