@@ -7,6 +7,9 @@
 /// 
 /// @date 2022-05-04
 /// @version 1.0
+///
+/// @date 2022-10-08
+/// @version 1.0.1        change CAPS Enums (https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#enum5-dont-use-all_caps-for-enumerators)
 /// 
 /// @copyright Copyright (c) 2022
 /// 
@@ -27,16 +30,16 @@ constexpr uint8_t DEBOUNCE_VAL  {30};  // The value can be reduced for buttons t
 //////////////////////////////////////////////////
 // Variables and Classdefinitions
 //////////////////////////////////////////////////
-enum class ButtonState : uint8_t {P_NONE,P_SHORT,P_LONG};
+enum class ButtonState : uint8_t {notPressed, shortPressed, longPressed};
 
 class Button {
-    uint16_t _isLong;           // Saves the time (in ms) from which a key press is recognized as long.
-    bool _activeState;          // Saves whether the buttons active state is HIGH or LOW.
-    uint8_t _pin;               // Button PIN number
-    bool _state;                // Saves the actual state of the button.
-    bool _prevState;            // Saves the previous state of the button.
-    uint32_t _pressingTime;     // Saves the length of time that the button was pressed (ms).
-    ButtonState _buttonState;   // Saves the status depending on how long the button was pressed.
+    uint8_t pin;               // Button PIN number
+    uint16_t isLong;           // Saves the time (in ms) from which a key press is recognized as long.
+    bool activeState;          // Saves whether the buttons active state is HIGH or LOW.
+    bool state;                // Saves the actual state of the button.
+    bool prevState;            // Saves the previous state of the button.
+    uint32_t pressingTime;     // Saves the length of time that the button was pressed (ms).
+    ButtonState buttonState;   // Saves the status depending on how long the button was pressed.
   
     public:
     //////////////////////////////////////////////////////////////////////////////
@@ -46,10 +49,12 @@ class Button {
     /// @param isLong         // time from which a key press is recognized as long
     /// @param activeState    // LOW if the button is connected with a pull up, otherwise HIGH with a pull down resistor
     //////////////////////////////////////////////////////////////////////////////
-    Button(decltype(_isLong) isLong = 1000, decltype(_activeState) activeState=LOW) : 
-      _isLong(isLong), _activeState(activeState) {
-      _state = !_activeState;
+
+    Button(decltype(pin) pin_ = 0, decltype(isLong) isLong_ = 1000, decltype(activeState) activeState_=LOW) : 
+      pin{pin_}, isLong{isLong_}, activeState{activeState_} {
+      state = !activeState;
     }
+    void begin();
     void begin(uint8_t);
     ButtonState tic(void);
     uint32_t getDuration(void) const;

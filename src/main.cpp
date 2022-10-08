@@ -40,6 +40,9 @@
 /// during compilation so that enough memory is available for the debugging output.
 /// (define DEBUG_ENABLED)
 ///
+/// @date 2022-10-08
+/// Button status designations changed
+///
 /// @copyright Copyright (c) 2022
 /// 
 //////////////////////////////////////////////////////////////////////////////
@@ -195,7 +198,7 @@ void loop () {
   }
 
 #ifndef DEBUG_ENABLED
-  if (dtButton.tic() != ButtonState::P_NONE) {
+  if (dtButton.tic() != ButtonState::notPressed) {
     showDate = true;
     printRtcTime(lcd, clockData, showDate);             // Don't wait until the next second after the button is pressed to show the date.
   }          

@@ -1,12 +1,9 @@
 //////////////////////////////////////////////////////////////////////////////
 /// @file button.cpp
-/// @author Kai R. (you@domain.com)
+/// @author Kai R.
 /// @brief Simple class for handling buttons.
 ///        A time (in ms) can be specified after which a button press is considered "long". 
 ///        Correspondingly, the tic() method returns the status NONE, LONG or SHORT.
-/// 
-/// @date 2022-06-03
-/// @version 1.0
 /// 
 /// @copyright Copyright (c) 2022
 /// 
@@ -18,12 +15,16 @@
 /// 
 /// @param pinnr 
 //////////////////////////////////////////////////////////////////////////////
-void Button::begin(uint8_t pinnr) {
-  _pin = pinnr;
-  switch(_activeState) {
-    case HIGH:  pinModeFast(_pin, INPUT); break;
-    case LOW:   pinModeFast(_pin, INPUT_PULLUP); break;
+void Button::begin() {
+  switch(activeState) {
+    case HIGH:  pinModeFast(pin, INPUT); break;
+    case LOW:   pinModeFast(pin, INPUT_PULLUP); break;
   }
+}
+
+void Button::begin(uint8_t pinnr) {
+  pin = pinnr;
+  begin();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -34,19 +35,19 @@ void Button::begin(uint8_t pinnr) {
 ButtonState Button::tic() {
   uint32_t now = millis();
 
-  _prevState=_state;
-  _buttonState = ButtonState::P_NONE;
-  _state = digitalReadFast(_pin);
+  prevState=state;
+  buttonState = ButtonState::notPressed;
+  state = digitalReadFast(pin);
     
-  if (_state == _activeState && _prevState != _activeState) {
-    _pressingTime = now;
-  } else if (_state != _activeState && _prevState == _activeState) {
-    _pressingTime = now - _pressingTime;
-    if (_pressingTime >= DEBOUNCE_VAL) {       // released after debounce time?
-      _buttonState = (_pressingTime >= _isLong) ? ButtonState::P_LONG : ButtonState::P_SHORT;  
+  if (state == activeState && prevState != activeState) {
+    pressingTime = now;
+  } else if (state != activeState && prevState == activeState) {
+    pressingTime = now - pressingTime;
+    if (pressingTime >= DEBOUNCE_VAL) {       // released after debounce time?
+      buttonState = (pressingTime >= isLong) ? ButtonState::longPressed : ButtonState::shortPressed;  
     }
   }
-  return _buttonState;
+  return buttonState;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -55,5 +56,5 @@ ButtonState Button::tic() {
 /// @return uint32_t Time in milliseconds
 //////////////////////////////////////////////////////////////////////////////
 uint32_t Button::getDuration(void) const {
-  return _pressingTime;
+  return pressingTime;
 }
