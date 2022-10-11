@@ -54,6 +54,8 @@ class Button {
       pin{pin_}, isLong{isLong_}, activeState{activeState_} {
       state = !activeState;
     }
+    Button(const Button&) = delete;             // No copy constructor
+    Button& operator=(const Button&) = delete;  // No assignment
     void begin();
     void begin(uint8_t);
     ButtonState tic(void);
