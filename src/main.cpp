@@ -50,9 +50,9 @@
 #include <Arduino.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
+#include <Button_SL.hpp>
 #include "bcdconv.hpp"
 #include "dcf77.hpp"
-#include "button.hpp"
 #include "display.hpp"
 #include "DS3231Wire.h"
 #include "digitalWriteFast.h"
@@ -116,8 +116,8 @@ ClockData clockData;
 dogm_7036 lcd;
 
 #ifndef DEBUG_ENABLED
-Button dtButton;
-Button blButton;
+Btn::ButtonSL dtButton(BUTTON_DT_PIN);
+Btn::ButtonSL blButton(BUTTON_BL_PIN);
 #endif
 
 //////////////////////////////////////////////////
@@ -146,8 +146,8 @@ void setup() {
   pinModeFast(DCF77_ON_OFF_PIN, OUTPUT);
   digitalWriteFast(DCF77_ON_OFF_PIN, LOW);   // Switch DCF77 receiver on (P-Channel MOSFet as switch)
 #ifndef DEBUG_ENABLED
-  dtButton.begin(BUTTON_DT_PIN);
-  blButton.begin(BUTTON_BL_PIN);
+  dtButton.begin();
+  blButton.begin();
 #endif
   // init DOGM-LCD
   initDisplay(lcd);
@@ -194,12 +194,12 @@ void loop() {
   }
 
 #ifndef DEBUG_ENABLED
-  if (dtButton.tic() != ButtonState::notPressed) {
+  if (dtButton.tick() != Btn::ButtonState::notPressed) {
     showDate = true;
     printRtcTime(lcd, clockData,
                  showDate);   // Don't wait until the next second after the button is pressed to show the date.
   }
-  switchBacklight(int1_second, blButton.tic());   // Switch backlight on if button has been pressed.
+  switchBacklight(int1_second, blButton.tick());   // Switch backlight on if button has been pressed.
 #endif
 
   // Do the following every second.

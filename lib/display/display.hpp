@@ -42,8 +42,8 @@
 
 #include <stdint.h>
 #include <SPI.h>
+#include <Button_SL.hpp>
 #include "dogm_7036.h"
-#include "button.hpp"
 
 //////////////////////////////////////////////////
 // Global constants and variables
@@ -119,6 +119,6 @@ public:
 void initDisplay(dogm_7036 &);
 void monoBacklight(byte);
 void printRtcTime(dogm_7036 &, ClockData &, bool);
-void switchBacklight(uint8_t, ButtonState);
+void switchBacklight(uint8_t, Btn::ButtonState);
 
 #endif

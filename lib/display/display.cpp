@@ -145,19 +145,19 @@ void monoBacklight(byte brightness) { analogWrite(PIN_BACKLIGHT, brightness); }
 /// @param second             Second of RT-Clock at which the button was pressed
 /// @param blButtonPressed    State of then button (not, short or long pressed)
 //////////////////////////////////////////////////////////////////////////////
-void switchBacklight(uint8_t second, ButtonState blButtonPressed) {
+void switchBacklight(uint8_t second, Btn::ButtonState blButtonPressed) {
   static bool backlightOn = false;
   static uint8_t lightOffTime;
 
-  if (blButtonPressed != ButtonState::notPressed && !backlightOn) {
+  if (blButtonPressed != Btn::ButtonState::notPressed && !backlightOn) {
     backlightOn = true;
     monoBacklight(BL_BRIGHTNESS_ON);
-    if (blButtonPressed == ButtonState::shortPressed) {
+    if (blButtonPressed == Btn::ButtonState::shortPressed) {
       lightOffTime = (second + BL_BURN_DURATION + 1) % MINUTE;   // Mod 60 Seconds
     } else {
       lightOffTime = MINUTE_IMPOSSIBLE;
     }
-  } else if (((blButtonPressed != ButtonState::notPressed && lightOffTime == MINUTE_IMPOSSIBLE) ||
+  } else if (((blButtonPressed != Btn::ButtonState::notPressed && lightOffTime == MINUTE_IMPOSSIBLE) ||
               second == lightOffTime) &&
              backlightOn) {
     backlightOn = false;

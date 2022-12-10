@@ -45,6 +45,8 @@ protected:
   DCF77Receive(void){};
 
 public:
+  DCF77Receive(const DCF77Receive &) = delete;              // prevent copy
+  DCF77Receive &operator=(const DCF77Receive &) = delete;   // prevent assignment
   void begin(void);
   void begin(uint8_t);
   void setActiveLow(bool);
