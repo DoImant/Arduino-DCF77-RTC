@@ -19,20 +19,20 @@
 
 #include <Arduino.h>
 #include "dcf77.hpp"
-#include "digitalWriteFast.h"
+#include <digitalWriteFast.h>
 
 //////////////////////////////////////////////////
 // Initialize static class variables
 //////////////////////////////////////////////////
 
-uint8_t DCF77Receive::_intPin{PIND2};
-bool DCF77Receive::_activeLow{false};
-uint8_t DCF77Receive::_seconds{0};
-uint16_t DCF77Receive::_duration{0};
-uint32_t DCF77Receive::_lastInt{0};
-bool DCF77Receive::_longSig{false};
-uint64_t DCF77Receive::_sequenceBuffer{0};
-DCF77Sequence DCF77Receive::_sequenceFlag{SEQ_ERROR};
+uint8_t DCF77Receive::_intPin {PIND2};
+bool DCF77Receive::_activeLow {false};
+uint8_t DCF77Receive::_seconds {0};
+uint16_t DCF77Receive::_duration {0};
+uint32_t DCF77Receive::_lastInt {0};
+bool DCF77Receive::_longSig {false};
+uint64_t DCF77Receive::_sequenceBuffer {0};
+DCF77Sequence DCF77Receive::_sequenceFlag {SEQ_ERROR};
 
 // Methods of DCF77Receive  //////////////////////////////////////////////////
 
@@ -239,23 +239,13 @@ bool DCF77Clock::getLeapSecond() const { return _leapSecond; }
 ///                 in decimal and in bcd format.
 //////////////////////////////////////////////////////////////////////////////
 uint8_t DCF77Clock::getSeconds() const { return _seconds; }
-
 uint8_t DCF77Clock::getMinutes() const { return bcdToDec(_minutes); }
-
 uint8_t DCF77Clock::getHours() const { return bcdToDec(_hours); }
-
 uint8_t DCF77Clock::getDay() const { return bcdToDec(_dayOfMonth); }
-
 uint8_t DCF77Clock::getMonth() const { return bcdToDec(_month); }
-
 uint8_t DCF77Clock::getYear() const { return bcdToDec(_year); }
-
 uint8_t DCF77Clock::getBcdMinutes() const { return _minutes; }
-
 uint8_t DCF77Clock::getBcdHours() const { return _hours; }
-
 uint8_t DCF77Clock::getBcdDay() const { return _dayOfMonth; }
-
 uint8_t DCF77Clock::getBcdMonth() const { return _month; }
-
 uint8_t DCF77Clock::getBcdYear() const { return _year; }

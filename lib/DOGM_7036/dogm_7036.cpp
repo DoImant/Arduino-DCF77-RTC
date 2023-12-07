@@ -10,9 +10,9 @@
 
 #include <Arduino.h>
 #include <SPI.h>
+#include <digitalWriteFast.h>
 
 #include "dogm_7036.h"
-#include "digitalWriteFast.h"
 
 #define INITLEN 8
 byte init_DOGM081_3V[INITLEN] = {0x31, 0x14, 0x55, 0x6D, 0x75, 0x30, 0x01, 0x06};
@@ -51,25 +51,18 @@ void dogm_7036::initialize(byte p_cs, byte p_si, byte p_clk, byte p_rs, byte p_r
 
   // Init DOGM-Text displays, depending on users choice of supply voltages and lines
   ptr_init = init_DOGM162_3V;   // default pointer for wrong parameters
-  if (lines == 1 && sup_5V == false)
-    ptr_init = init_DOGM081_3V;
-  else if (lines == 1 && sup_5V == true)
-    ptr_init = init_DOGM081_5V;
-  else if (lines == 2 && sup_5V == false)
-    ptr_init = init_DOGM162_3V;
-  else if (lines == 2 && sup_5V == true)
-    ptr_init = init_DOGM162_5V;
-  else if (lines == 3 && sup_5V == false)
-    ptr_init = init_DOGM163_3V;
-  else if (lines == 3 && sup_5V == true)
-    ptr_init = init_DOGM163_5V;
+  if (lines == 1 && sup_5V == false) ptr_init = init_DOGM081_3V;
+  else if (lines == 1 && sup_5V == true) ptr_init = init_DOGM081_5V;
+  else if (lines == 2 && sup_5V == false) ptr_init = init_DOGM162_3V;
+  else if (lines == 2 && sup_5V == true) ptr_init = init_DOGM162_5V;
+  else if (lines == 3 && sup_5V == false) ptr_init = init_DOGM163_3V;
+  else if (lines == 3 && sup_5V == true) ptr_init = init_DOGM163_5V;
 
   flag_5V = sup_5V;      // need to save which DOG display is connected for function set (contrast) and
   displ_lines = lines;   // set position
 
   digitalWriteFast(p_rs, LOW);
-  for (i = 0; i < INITLEN; i++)
-    command(*ptr_init++);
+  for (i = 0; i < INITLEN; i++) command(*ptr_init++);
 
   displ_onoff(true);     // Display on
   cursor_onoff(false);   // Cursor off
@@ -123,10 +116,8 @@ Desc: turns the entire DOG-Display on or off
 Vars: on (true = display on, false = display off)
 ------------------------------*/
 void dogm_7036::displ_onoff(boolean on) {
-  if (on == true)
-    cursor |= 0x04;
-  else
-    cursor &= ~0x04;
+  if (on == true) cursor |= 0x04;
+  else cursor &= ~0x04;
 
   command(cursor);
 }
@@ -137,10 +128,8 @@ Desc: turns the cursor on or off
 Vars: on (true = cursor blinking, false = cursor off)
 ------------------------------*/
 void dogm_7036::cursor_onoff(boolean on) {
-  if (on == true)
-    cursor |= 0x01;
-  else
-    cursor &= ~0x01;
+  if (on == true) cursor |= 0x01;
+  else cursor &= ~0x01;
 
   command(cursor);
 }
@@ -154,8 +143,7 @@ void dogm_7036::define_char(byte mem_adress, byte *dat) {
   byte i = 0;
   command(0x40 + 8 * mem_adress);
 
-  for (i = 0; i < 8; i++)
-    data(dat[i]);
+  for (i = 0; i < 8; i++) data(dat[i]);
 
   position(1, 1);   // set standard position DDRAM Adress
 }
@@ -182,17 +170,14 @@ void dogm_7036::contrast(byte contr) {
   else   // 2 and 3 line display
     command(0x39);
 
-  if (flag_5V)
-    command(0x50 | (contr >> 4));   // booster off, 2 high bits of contrast
-  else
-    command(0x54 | (contr >> 4));   // booster on, 2 high bits of contrast
+  if (flag_5V) command(0x50 | (contr >> 4));   // booster off, 2 high bits of contrast
+  else command(0x54 | (contr >> 4));           // booster on, 2 high bits of contrast
 
   command(0x70 | (contr & 0x0F));   // 4 low bits of contrast
 
   if (displ_lines == 1)   // switch to instruction table 0 depending on display lines
     command(0x30);
-  else
-    command(0x38);
+  else command(0x38);
 }
 
 //---------------------------------------------private Functions----------------------------------------------------
@@ -208,8 +193,7 @@ void dogm_7036::command(byte dat) {
   spi_put_byte(dat);
   if (dat <= 0x03)   // return home or clear display need 1.08 ms
     delay(1);
-  else
-    delayMicroseconds(30);   // all other commands need 26 us
+  else delayMicroseconds(30);   // all other commands need 26 us
 }
 
 /*----------------------------
@@ -293,8 +277,7 @@ Vars: data
 ------------------------------*/
 void dogm_7036::spi_out(byte dat) {
   byte i = 8;
-  if (hardware)
-    SPI.transfer(dat);
+  if (hardware) SPI.transfer(dat);
   else {
     do {
       if (dat & 0x80) {

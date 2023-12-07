@@ -42,6 +42,7 @@
 
 #include <stdint.h>
 #include <SPI.h>
+#include <digitalWriteFast.h>
 #include <Button_SL.hpp>
 #include "dogm_7036.h"
 

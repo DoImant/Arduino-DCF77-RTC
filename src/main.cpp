@@ -48,6 +48,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include <Arduino.h>
+#include <digitalWriteFast.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
 #include <Button_SL.hpp>
@@ -55,7 +56,6 @@
 #include "dcf77.hpp"
 #include "display.hpp"
 #include "DS3231Wire.h"
-#include "digitalWriteFast.h"
 
 //////////////////////////////////////////////////
 // Definitions
@@ -70,17 +70,17 @@
 // If the code is to be used for a developer board (Uno/Nano/Micro) then uncomment DEV_BOARD.
 // On the development boards with USB connection, pin6 is used instead of pin14 for switching the DCF77 module on and
 // off.
-//#define DEV_BOARD
+// #define DEV_BOARD
 
 // Uncomment for debug output on the serial console or to switch on I2C/Wire Fast Mode
-//#define WIRE_FAST_MODE
-//#define PRINT_TIME_SERIAL
-//#define DEBUG_DCF77CONTROL
-//#define DEBUG_ISR
-//#define DEBUG_INT1
-//#define DEBUG_DCF77_SEQ_ADD_CHECK
-//#define DEBUG_DCF77_SEQ
-//#define SET_TEST_TIME
+// #define WIRE_FAST_MODE
+// #define PRINT_TIME_SERIAL
+// #define DEBUG_DCF77CONTROL
+// #define DEBUG_ISR
+// #define DEBUG_INT1
+// #define DEBUG_DCF77_SEQ_ADD_CHECK
+// #define DEBUG_DCF77_SEQ
+// #define SET_TEST_TIME
 
 // If DEBUG_ENABLED is defined, then certain parts of the program are disabled ( in loop() ) to
 // free up space for the debug output on the serial console.
@@ -104,8 +104,8 @@ constexpr uint8_t DCF77_ON_OFF_PIN{6};   // Switch DCF77 Receiver on or off
 constexpr uint8_t DCF77_ON_OFF_PIN{14};   // Switch DCF77 Receiver on or off
 #endif
 
-constexpr uint32_t DCF77_SLEEP{3590};   // Period (in seconds) for which the radio clock is switched off.
-// Here 3590 Seconds.
+constexpr uint32_t DCF77_SLEEP{28790};   // Period (in seconds) for which the radio clock is switched off.
+// Here 28790 Seconds.
 
 // int1_second is just a counter that increases every second.
 // It is not necessarily in sync with the RTC seconds

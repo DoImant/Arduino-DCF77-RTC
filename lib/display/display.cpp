@@ -17,7 +17,7 @@
 #include "display.hpp"
 #include "bcdconv.hpp"
 #include "DS3231Wire.h"
-#include "digitalWriteFast.h"
+
 
 // Methods of ClockSeparators //////////////////////////////////////////////////////
 
